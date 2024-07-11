@@ -2,7 +2,7 @@
 {
     public static class RedisKeyConst
     {
-        //
-        public const string IpToCountry = "ip-to-country";
+        //{0}: 分區
+        public const string IpToCountryRange = "ip-to-country:range-{0}";
     }
 }
