@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IpLocations.Api\IpLocations.Api.csproj" />
+    <ProjectReference Include="..\..\src\IpLocations.Api\IpLocations.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>
