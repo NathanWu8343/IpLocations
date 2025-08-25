@@ -1,285 +1,239 @@
 # GitHub Copilot 指南
 
-**語言**：一律使用**繁體中文**回答
+本文件旨在為 GitHub Copilot 提供清晰、一致的程式碼生成指南，確保所有產出皆符合本專案的架構、風格與品質標準。
 
-本文件為 GitHub Copilot 在本專案中的最佳化使用規範，確保生成程式碼與既有專案風格一致，並符合可維護性、效能、安全性與測試性需求
-
----
-
-## 優先準則
-
-在為此存放庫生成程式碼時：
-
-1. **版本相容性**：一律偵測並遵循此專案中使用的語言、框架與函式庫的確切版本  
-2. **程式庫模式**：掃描程式庫以找出既有模式  
-3. **架構一致性**：維持我們的分層架構風格與既定邊界  
-4. **程式碼品質**：在所有生成的程式碼中優先考慮可維護性、效能、安全性與可測試性
+**語言**：一律使用**繁體中文**回答（程式碼註解、提交訊息、PR、文件）。
 
 ---
 
-## 技術版本偵測
+## 1. 核心原則 (Core Principles)
 
-在生成程式碼之前，請掃描程式庫以識別：
+這是最高指導原則，在任何情況下都應優先遵循。
 
-1. **語言版本**：  
-   - .NET 8.0 (net8.0) —— 必須嚴格遵循  
-   - 啟用 C# 可為 Null 參考型別（`<Nullable>enable</Nullable>`）  
-   - 啟用隱含 using（`<ImplicitUsings>enable</ImplicitUsings>`）  
-   - 切勿使用超過 C# 12/.NET 8.0 的語言功能  
-
-2. **框架版本**：  
-   - ASP.NET Core 8.0 用於 Web API  
-   - Microsoft.NET.Sdk.Web 用於 API 專案  
-   - Microsoft.NET.Sdk 用於函式庫與測試專案  
-   - 生成程式碼必須與這些框架版本相容  
-
-3. **函式庫版本**：  
-   - StackExchange.Redis v2.8.0 —— 用於 Redis 操作  
-   - Swashbuckle.AspNetCore v6.4.0 —— 用於 API 文件  
-   - xUnit v2.5.3+ —— 用於單元測試  
-   - FluentAssertions v6.12.0 —— 用於測試斷言  
-   - Microsoft.AspNetCore.Mvc.Testing v8.0.6 —— 用於整合測試  
-   - Testcontainers.Redis v3.8.0 —— 用於整合測試 Redis 容器  
-   - BenchmarkDotNet v0.13.12 —— 用於效能基準測試  
+1.  **版本相容性**：嚴格遵循專案指定的語言、框架與函式庫版本，絕不使用任何超出範圍的功能。
+2.  **維持一致性**：深入分析現有程式碼庫，主動學習並複製既有的設計模式、命名慣例與架構風格。
+3.  **架構邊界**：尊重既有的分層架構（Layered Architecture），確保新程式碼不會破壞模組之間的界線。
+4.  **程式碼品質**：將可維護性、效能、安全性與可測試性視為首要目標，產出的程式碼必須是穩定且高品質的。
 
 ---
 
-## 程式庫掃描指引
+## 2. 專案設定與技術棧 (Project Configuration & Tech Stack)
 
-1. 找出與正在修改或建立的檔案相似的檔案  
-2. 分析模式，包括：  
-   - 命名慣例（類別、方法、屬性用 PascalCase；參數與區域變數用 camelCase）  
-   - 程式碼組織（Controllers、Infra、Constants、Misc 資料夾）  
-   - 錯誤處理（無效輸入回傳空字串，遺失資料回傳 NotFound()）  
-   - 非同步模式（async/await 與 Task<T> 回傳型別）  
-   - 文件風格（使用 /// XML 文件註解）  
-3. 遵循程式庫中最一致的模式  
-4. 當存在衝突模式時，優先考慮較新的檔案或測試覆蓋率較高的檔案  
-5. 切勿引入程式庫中不存在的模式  
+在生成任何程式碼之前，必須掃描並識別以下專案設定，並以此為基礎。
 
----
+### 2.1. 主要技術與版本
 
-## 程式碼品質標準
+* **語言與執行環境**:
+    * `.NET 8.0` (`<TargetFramework>net8.0</TargetFramework>`)
+    * `C# 12` (切勿使用超過此版本的語言功能)
+    * 啟用 C# 可為 Null 參考型別 (`<Nullable>enable</Nullable>`)
+    * 啟用隱含 using (`<ImplicitUsings>enable</ImplicitUsings>`)
+* **專案框架**:
+    * `ASP.NET Core 8.0`: 用於 Web API 專案。
+    * `Microsoft.NET.Sdk.Web`: 用於 API 專案類型。
+    * `Microsoft.NET.Sdk`: 用於類別庫與測試專案類型。
+* **關鍵函式庫**:
+    * `StackExchange.Redis v2.8.0`: Redis 操作。
+    * `Swashbuckle.AspNetCore v6.4.0`: API 文件 (Swagger)。
+    * `xUnit v2.5.3+`: 單元測試框架。
+    * `FluentAssertions v6.12.0`: 測試斷言 (Assertions)。
+    * `Microsoft.AspNetCore.Mvc.Testing v8.0.6`: 整合測試。
+    * `Testcontainers.Redis v3.8.0`: 用於整合測試的 Redis 容器。
+    * `BenchmarkDotNet v0.13.12`: 效能基準測試。
 
-### 可維護性
-- 撰寫自我說明的程式碼並遵循既有命名模式  
-- 公開成員、類別、命名空間使用 PascalCase（例如：`IpLocationsController`, `IpRangeStore`）
-- 私有欄位與區域變數使用 camelCase 並加底線前綴（例如：`_db`, `_ipRangeStore`）
-- 介面名稱以 "I" 為前綴（例如：IUserService）
-- 參數與區域變數使用 camelCase（例如：`ipNum`, `startIp`）  
-- 程式碼依邏輯分組於 Controllers、Infra、Constants、Misc  
-- 類別專注於單一職責，例如 `IpConverter` 處理 IP 轉換  
-- 依既有模式在建構函式中實作相依性注入  
-- 在參考成員名稱時，使用 `nameof` 而非字串常值
-- 為每個函式撰寫清晰且簡潔的註解
+### 2.2. 專案結構
 
-### 效能
-- 使用有效率的資料結構，例如 `IpRangeStore` 中的 SortedSet  
-- 使用位元運算進行 IP 轉換（`IpConverter.IpToInt` 示範）  
-- 非同步 I/O 操作一律使用 async/await（與既有 Redis 呼叫一致）  
-- 實作快取策略，遵循既有 Redis 使用模式  
-- 依既有模式進行資源管理與釋放  
+嚴格遵循現有的目錄結構來組織檔案。
 
-### 安全性
-- 使用 regex 驗證輸入（如 `IpConverter.IpToInt` 所示）  
-- 無效輸入回傳 -1 或空字串，而非拋出例外  
-- Redis 操作使用參數化方式（如既有程式碼）  
-- 連線字串管理遵循既有模式  
-- 依既有設定方式處理敏感資料  
-
-### 可測試性
-- 遵循相依性注入模式以保持低耦合  
-- 建構函式注入（如 `IpLocationsController` 與 `IpRangeStore`）  
-- 整合測試繼承 `BaseIntegrationTest`  
-- 外部相依性使用 Testcontainers 模擬  
-- 測試遵循 Arrange-Act-Assert 格式  
+* `src/IpLocations.Api/`: 主 API 專案
+    * `Controllers/`: API 控制器。
+    * `Infra/`: 基礎設施層 (資料存取、外部服務整合)。
+    * `Constants/`: 應用程式範圍的常數。
+    * `Misc/`: 通用工具類別。
+    * `Properties/`: 專案設定 (例如 `launchSettings.json`)。
+* `tests/`: 測試專案
+    * `IpLocations.UnitTests/`: 單元測試。
+    * `IpLocations.IntegrationTests/`: 整合測試 (包含 `Abstractions` 子目錄)。
+    * `Benchmark/`: 效能基準測試。
 
 ---
 
-## 文件需求
+## 3. 程式碼撰寫規範 (Coding Standards & Conventions)
 
-- 公開 API 使用 `///` XML 文件註解  
-- 參數、回傳值、例外狀況依既有風格記錄  
-- 描述清楚簡潔，如 `IpLocationsController` 中所示  
-- 若已有中文實作註解，需保留（例如：`//TODO: 可以調整為檔案載入方式`）  
-- 文件完整度需與既有程式碼一致  
+此部分定義了程式碼的具體風格與撰寫方式。
 
----
+### 3.1. 命名慣例 (Naming Conventions)
 
-## 測試方法
+* **類別、介面、公開成員 (PascalCase)**:
+    * 控制器: `{Entity}Controller` (例如: `IpLocationsController`)
+    * 介面: `I{ServiceName}` (例如: `IUserService`)
+    * 服務/儲存庫: `{Entity}Store` 或 `{Entity}Service` (例如: `IpRangeStore`)
+    * 工具類別: `{Purpose}` (例如: `IpConverter`)
+    * 常數類別: `{Purpose}Const` (例如: `RedisKeyConst`)
+* **私有欄位 (camelCase with underscore prefix)**:
+    * 使用底線 `_` 作為前綴 (例如: `_db`, `_ipRangeStore`)
+* **方法參數與區域變數 (camelCase)**:
+    * 使用描述性名稱 (例如: `ipNum`, `startIp`)
+* **檔案與目錄**:
+    * 檔案名稱必須與其包含的公開類別名稱完全相符。
+    * 目錄名稱使用 PascalCase。
 
-### 單元測試
-- 使用 xUnit `[Theory]` 與 `[InlineData]`  
-- 命名模式：`MethodName_Should_ExpectedBehavior_WhenCondition`  
-- 使用 FluentAssertions（`.Should().Be()`）  
-- 測試結構包含 Arrange-Act-Assert 並加上註解  
-- 測試有效與無效輸入（如 `IpConverterTests`）  
+### 3.2. C#/.NET 特定指南
 
-### 整合測試
-- 繼承 `BaseIntegrationTest`  
-- 使用 `IntegrationTestWebAppFactory`  
-- 套用 `IClassFixture<IntegrationTestWebAppFactory>`  
-- 使用 Testcontainers.Redis 管理容器  
-- 測試採用 async Task 回傳型別  
-- 驗證 HTTP 狀態碼與回應內容  
+* **Null 檢查**:
+    * 一律使用 `is null` 或 `is not null` 進行比較，而非 `== null` 或 `!= null`。
+    * 信任 C# 的 null 狀態分析，當型別系統已保證值不為 null 時，無需進行多餘的檢查。
+* **型別選擇**:
+    * 優先使用不可變 (immutable) 型別，除非有明確的可變性需求。
+    * 對於資料傳輸物件 (DTOs) 或簡單的不可變資料結構，優先使用 `record` 而非 `class`。
+* **非同步程式設計**:
+    * 所有 I/O 密集型操作（如資料庫、網路請求）都必須使用 `async/await` 與 `Task<T>`。
+* **其他**:
+    * 當型別可由右手邊推斷時，使用 `var` 宣告區域變數。
+    * 在參考成員名稱時，使用 `nameof` 運算子而非字串常值。
+    * 優先使用模式比對 (Pattern Matching) 與 switch 運算式，以取代傳統的 if-else if-else 鏈。
+    * 使用 `string.IsNullOrEmpty()` 或 `string.IsNullOrWhiteSpace()` 來驗證字串。
+    * 高效地使用 LINQ，例如 `.Any()`, `.FirstOrDefault()`, `.Select()`, `.ToArray()`。
 
-### 效能測試
-- 使用 BenchmarkDotNet  
-- 套用 `[MemoryDiagnoser]` 與 `[SimpleJob(RuntimeMoniker.Net80)]`  
-- 建立多個基準方法比較不同實作  
-- 遵循既有基準測試模式  
+### 3.3. 文件與註解 (Documentation & Comments)
 
----
-
-## 技術專屬指南
-
-### .NET 指南
-- 僅針對 .NET 8.0（`<TargetFramework>net8.0</TargetFramework>`）  
-- 啟用可為 Null 參考型別與隱含 using  
-- 宣告變數為不可為 null，並在進入點檢查 `null`
-- 一律使用 `is null` 或 `is not null`，而非 `== null` 或 `!= null`
-- 信任 C# 的 null 註解，當型別系統保證值不可為 null 時，不要額外新增檢查
-- 除非有可變性需求，否則偏好使用不可變類型。
-- 對於不可變類型，偏好使用 `record` 而非 `class`  
-- 非同步操作使用 async/await 與 Task<T>  
-- 相依性注入遵循 Program.cs 的既有模式  
-- 使用最小化主機模型（minimal hosting model）
-- 儘可能使用模式比對與 switch 運算式
-
-
-### ASP.NET Core 指南
-- 使用 `[Route("api/[controller]")]` 路由模式  
-- 控制器繼承 `ControllerBase`  
-- 回傳適當的 ActionResult（`Ok()`, `NotFound()` 等）  
-- 使用 `[ApiController]` 啟用自動模型驗證  
-- 服務註冊遵循 Program.cs 模式  
-- 相依性註冊使用 `IServiceCollection` 擴充方法  
-
-### Redis 指南
-- 僅使用 StackExchange.Redis v2.8.0 模式  
-- `IConnectionMultiplexer` 註冊為 Singleton  
-- Redis 操作使用 `IDatabase`（如 `IpRangeStore`）  
-- 範圍查詢使用 SortedSet（`SortedSetRangeByScoreAsync`）  
-- Redis Key 命名遵循 `RedisKeyConst`  
-- 所有 Redis 操作均使用 async  
-
-### 測試指南
-- 使用 xUnit v2.5.3+  
-- 斷言使用 FluentAssertions  
-- API 整合測試使用 Microsoft.AspNetCore.Mvc.Testing  
-- Redis 測試使用 Testcontainers.Redis  
-- 測試專案結構：UnitTests 與 IntegrationTests  
+* **XML 文件註解**:
+    * 所有 `public` 的 API、類別與方法都必須使用 `///` XML 文件註解。
+    * 註解內容需包含 `<summary>`，並視情況加入 `<param>`, `<returns>`, `<exception>`。
+    * 描述必須清晰簡潔，風格與 `IpLocationsController` 保持一致。
+* **實作註解**:
+    * 若程式碼中已存在中文實作註解（例如 `// TODO: ...`），必須予以保留。
 
 ---
 
-## 專案結構指南
+## 4. 架構與設計模式 (Architecture & Design Patterns)
 
-遵循既有資料夾結構：  
+此部分描述了專案中採用的高階設計決策與模式。
 
-- `src/IpLocations.Api/` —— 主 API 專案  
-  - `Controllers/` —— API 控制器  
-  - `Infra/` —— 基礎設施（資料存取、外部服務）  
-  - `Constants/` —— 應用程式常數  
-  - `Misc/` —— 工具類別  
-  - `Properties/` —— 啟動設定與組態  
-- `tests/` —— 測試專案  
-  - `IpLocations.UnitTests/` —— 單元測試  
-  - `IpLocations.IntegrationTests/` —— 整合測試（含 Abstractions 資料夾）  
-  - `Benchmark/` —— 效能基準測試  
+### 4.1. 架構一致性掃描
 
----
+在修改或建立檔案時，必須執行以下步驟：
 
-## 命名慣例
+1.  **尋找相似檔案**: 在專案中找出功能或職責相似的既有檔案。
+2.  **分析既有模式**: 深入分析找到的檔案，識別並學習以下模式：
+    * **程式碼組織**: 檔案在專案結構中的位置 (例如: `Controllers`, `Infra`)。
+    * **相依性注入**: 依賴項是如何在建構函式中被注入的。
+    * **非同步流程**: `async/await` 的使用方式與 `Task<T>` 的回傳型別。
+    * **錯誤處理**: 如何處理無效輸入或找不到資料的情況。
+3.  **遵循主流模式**: 嚴格遵循在程式碼庫中最常見且最一致的模式。
+4.  **解決衝突**: 當存在多種衝突模式時，優先參考較新的檔案或測試覆蓋率較高的實作。
+5.  **禁止引入新模式**: 切勿在未經定義的情況下引入專案中不存在的全新設計模式。
 
-### 類別與方法
-- 控制器：`{Entity}Controller`（例如：`IpLocationsController`）  
-- 服務：`{Entity}Store` 或 `{Entity}Service`（例如：`IpRangeStore`）  
-- 工具類別：`{Purpose}`（例如：`IpConverter`）  
-- 常數：`{Purpose}Const`（例如：`RedisKeyConst`）  
+### 4.2. 錯誤處理 (Error Handling)
 
-### 變數與參數
-- 使用描述性名稱（如：`ipNum`, `startIp`, `endIp`, `redisConnection`）  
-- 私有欄位加底線前綴（例如：`_db`, `_ipRangeStore`）  
-- 當型別明顯時使用 `var`  
+* **API 回應**:
+    * 資源不存在時，回傳 `NotFound()` (`404 Not Found`)。
+    * 對於其他標準 HTTP 狀態，回傳適當的 `ActionResult` (例如: `Ok()`, `BadRequest()`)。
+* **方法回傳值**:
+    * 對於無效輸入，回傳一個代表失敗的特定值 (例如，`IpConverter.IpToInt` 對無效 IP 回傳 `-1`)，而非拋出例外。
+* **例外處理**:
+    * 僅在程式遇到無法恢復的關鍵錯誤時才拋出例外（例如：啟動時缺少必要組態）。
+    * 避免在公開 API 中洩露內部實作細節。
+* **輸入驗證**:
+    * 優先使用正規表示式 (Regex) 或 .NET 內建的驗證機制來檢查輸入格式。
 
-### 檔案與資料夾
-- 檔名需與類別名稱完全一致  
-- 資料夾使用 PascalCase  
-- 功能需依邏輯分組  
+### 4.3. 相依性注入 (Dependency Injection)
 
----
+* **實作方式**: 嚴格使用建構函式注入 (Constructor Injection)。
+* **服務註冊**:
+    * 所有服務都在 `Program.cs` 中使用 `IServiceCollection` 擴充方法進行註冊。
+    * 遵循最小化主機模型 (Minimal Hosting Model)。
+* **生命週期**:
+    * `IConnectionMultiplexer` (Redis) 註冊為 `Singleton`。
+    * 其他服務的生命週期需參考 `Program.cs` 中的既有設定。
 
-## 錯誤處理模式
+### 4.4. 組態管理 (Configuration Management)
 
-- 無效輸入回傳適當值（例如：無效 IP 回傳 `-1`，未找到則回傳空字串）  
-- 必要組態值使用 `ArgumentNullException`  
-- 資源不存在時回傳 `NotFound()`  
-- 使用 regex 驗證輸入（如 `IpConverter`）  
-- 例外處理需避免洩露內部實作細節  
+* **存取方式**: 使用 `IConfiguration` 介面來存取 `appsettings.json` 中的設定。
+* **必要組態**:
+    * 對於應用程式啟動所必需的組態值，使用空合併運算子 (`??`) 進行檢查。
+    * 若缺少必要組態，應拋出 `ArgumentNullException`，模式如下：
+        ```csharp
+        _redisConnectionString = configuration["Redis"] ?? throw new ArgumentNullException("Redis configuration is missing.");
+        ```
 
-## 組態模式
+### 4.5. Redis 使用模式
 
-- 使用 `IConfiguration` 存取連線字串與設定  
-- Redis 連線字串儲存於組態鍵 `"Redis"`  
-- 必要組態使用空合併運算子拋出例外  
-- 模式：`?? throw new ArgumentNullException("ConfigKey")`  
-
-## 一般最佳實踐
-
-- 使用 `string.IsNullOrEmpty()` 驗證字串  
-- 高效使用 LINQ（`.Any()`, `.First()`, `.Select()`, `.ToArray()`）  
-- 所有 I/O 操作一致使用 async/await  
-- 相依性生命週期依既有模式（Redis 使用 Singleton）  
-- 正確實作資源釋放  
-- 使用有意義的變數名稱  
-- 類別中邏輯需依功能分組  
-- 方法需保持簡潔與專注  
-- 避免硬編碼，使用常數  
+* **客戶端**: 僅使用 `StackExchange.Redis` 函式庫。
+* **操作介面**: Redis 操作必須透過 `IDatabase` 介面進行。
+* **資料結構**: 範圍查詢使用 `SortedSet`，並透過 `SortedSetRangeByScoreAsync` 方法執行。
+* **Key 命名**: Redis Key 必須統一定義在 `RedisKeyConst` 類別中。
+* **非同步**: 所有與 Redis 的互動都必須是非同步的 (`async/await`)。
 
 ---
 
-## Git Commit（Conventional Commits）
+## 5. 測試策略 (Testing Strategy)
 
-### 格式
+所有新功能或變更都必須伴隨對應的測試。
 
-```text
-<type>: <subject>
+### 5.1. 通用原則
 
-<body>
-````
-* **type**：
-  * `feat` 新功能
-  * `fix` 修錯
-  * `docs` 文件
-  * `style` 格式（不影響行為）
-  * `refactor` 重構（不改變商業邏輯）
-  * `perf` 效能
-  * `test` 測試
-  * `chore` 建置/工具/維運
-  * `revert` 回復（如：`revert: feat(auth): support OAuth2 login`）
-* **subject**：祈使句、簡短、末尾不加句點
-* **body**（選填)：條列「變更內容 / 原因 / 影響」
+* **測試結構**: 嚴格遵循 `Arrange-Act-Assert` 格式，並可選擇性地加上註解標示各區塊。
+* **斷言函式庫**: 一律使用 `FluentAssertions` (例如: `result.Should().Be(expected);`)。
+* **測試覆蓋**: 必須同時包含正向情境（有效輸入）與負向情境（無效輸入、邊界條件）的測試案例。
 
-### 範例
+### 5.2. 單元測試 (Unit Tests)
 
-```text
-fix: 修正員工管理的時間格式轉換
+* **框架**: `xUnit`
+* **命名慣例**: `MethodName_Should_ExpectedBehavior_When_Condition`
+* **參數化測試**: 優先使用 `[Theory]` 搭配 `[InlineData]` 來測試多組輸入與預期輸出。
 
-1. 調整 TimeUtils 的時區偏移計算，改為自 timestamp 扣除偏移量。
-```
+### 5.3. 整合測試 (Integration Tests)
 
-## 分支與 PR 流程
+* **框架**: `Microsoft.AspNetCore.Mvc.Testing` 搭配 `xUnit`。
+* **基礎設施**:
+    * 測試類別必須繼承自專案的 `BaseIntegrationTest`。
+    * 使用 `IClassFixture<IntegrationTestWebAppFactory>` 來管理應用程式生命週期。
+* **外部依賴**:
+    * 使用 `Testcontainers.Redis` 來建立用於測試的 Redis 容器。
+* **驗證**: 測試應驗證 HTTP 回應的狀態碼 (Status Code) 與回應內容 (Response Body)。
+* **非同步**: 測試方法必須回傳 `async Task`。
 
-* **分支命名**：`feature/<短描述>`、`fix/<短描述>`、`chore/<短描述>`
-* **PR 標題**：與 commit type 對齊（如 `feat: 新增 Orders 建立 API`）
-* **PR Checklist（至少）**：
+### 5.4. 效能測試 (Performance Tests)
 
-  * [ ] 單元測試通過（含 Positive/Negative）
-  * [ ] 有必要的文件更新（README/OpenAPI/變更說明）
-  * [ ] 觀測性端點可用（`/actuator/health`、`/actuator/prometheus`）
-  * [ ] 無明顯 N+1 / 多餘查詢；必要索引已建立
-  * [ ] 錯誤訊息清晰且一致
-* **Merge 策略**：建議 **squash & merge**（保持線性歷史）
-* **Changelog**：版本釋出時依 Conventional Commits 產生（建議 `CHANGELOG.md`）
+* **框架**: `BenchmarkDotNet`
+* **設定**:
+    * 必須套用 `[MemoryDiagnoser]` 屬性以分析記憶體分配。
+    * 使用 `[SimpleJob(RuntimeMoniker.Net80)]` 指定執行的 .NET 版本。
+* **實作**: 建立多個 `[Benchmark]` 方法來比較不同實作方案的效能。
 
 ---
+
+## 6. 開發流程 (Development Workflow)
+
+此部分定義了版本控制與協作的規範。
+
+### 6.1. Git Commit 訊息 (Conventional Commits)
+
+* **格式**:
+    ```text
+    <type>: <subject>
+    
+    <body>
+    ```
+* **Type**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `revert`。
+* **Subject**: 祈使句、簡短描述、結尾不加句點。
+* **Body** (選填): 以條列式說明「變更內容 / 原因 / 影響」。
+* **範例**:
+    ```text
+    fix: 修正時間格式轉換的時區偏移問題
+    
+    - 調整 TimeUtils 的時區計算邏輯，確保能正確處理 UTC 時間。
+    - 新增單元測試案例以涵蓋夏令時間轉換。
+    ```
+
+### 6.2. 分支與 Pull Request (PR) 流程
+
+* **分支命名**: `feature/<short-description>`, `fix/<short-description>`, `chore/<short-description>`。
+* **PR 標題**: 需與 Commit `type` 對齊 (例如: `feat: 新增訂單建立 API`)。
+* **PR Checklist**: 提交 PR 前必須完成以下檢查項目：
+    * `[ ]` 單元測試與整合測試皆通過。
+    * `[ ]` 已更新相關文件 (README, API 文件等)。
+    * `[ ]` 程式碼中無效能陷阱 (如 N+1 查詢)。
+    * `[ ]` 錯誤訊息清晰且與專案風格一致。
+* **Merge 策略**: 採用 **Squash and Merge** 以保持 Git 歷史的線性與整潔。
