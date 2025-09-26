@@ -147,7 +147,7 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
 4.  詢問效能要求和第三方服務
 5.  使用所有收集到的資訊產生指導文件
 6.  使用者檢閱並批准文件
-7.  儲存到 `.bmand\steering\` 目錄
+7.  儲存到 `.bmad-core\steering\` 目錄
 
 ## Next Steps
 建立指導文件後，它們將在以下指令中自動被參考：
