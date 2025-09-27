@@ -1,11 +1,16 @@
 ---
 mode: agent
-tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 'changes', 'testFailure', 'fetch', 'githubRepo', 'context7']
+tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 'changes', 'testFailure', 'fetch', 'githubRepo', 'todos', 'context7']
 ---
 
 # Spec Tasks Command
 
 根據已批准的設計文件，產生完整且可執行的實作任務列表。
+
+## Usage
+```
+/spec-tasks [feature-name]
+```
 
 ## Instructions
 您正在處理規格工作流程的 **任務階段**，請嚴格依照以下步驟執行。

@@ -7,6 +7,11 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
 
 建立新的功能規格，並嚴格遵循規格驅動的工作流程。
 
+## Usage
+```
+/spec-create [feature-name] [description]
+```
+
 ## Instructions
 您正在協助建立一個新的功能規格。請精確執行以下步驟，不得跳過或合併。
 
@@ -47,6 +52,12 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
    - 詢問使用者：「需求看起來正確嗎？如果正確，我們就可以進入設計階段。」
    - 在得到明確批准之前，不得繼續進行。
 
+## Example
+/spec-create user-authentication "允許使用者安全地註冊和登入"
+
+## Next Steps
+需求獲得批准後，進入 `/spec-design` 階段。
+
 ## CRITICAL REMINDERS
 
 **❌ 絕對禁止：**
@@ -58,9 +69,3 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
 - 功能名稱一律使用 kebab-case。
 - 驗收標準必須是正確的 EARS 格式。
 - **強制步驟**：在產生需求前，必須完成程式碼庫分析並記錄。
-
-## Example
-/spec-create user-authentication "允許使用者安全地註冊和登入"
-
-## Next Steps
-需求獲得批准後，進入 `/spec-design` 階段。

@@ -1,21 +1,28 @@
 ---
 mode: agent
-tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 'changes', 'testFailure', 'fetch', 'githubRepo', 'context7']
+tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'think', 'changes', 'fetch', 'extensions', 'todos', 'context7']
+description: '建立或更新提供持續性專案背景的指導文件'
 ---
 
 # Spec Steering Setup Command
 
 建立或更新提供持續性專案背景的指導文件。
 
+## Usage
+```
+/document-steering
+```
+
+
 ## Instructions
 您正在協助設定將指導所有未來規格開發的指導文件。這些文件提供有關產品願景、技術堆疊和專案結構的持續性背景。
 
-## Process
+## Processing Flow
 
-0.  **⚠️ 開始前的工具確認**
+0.  **開始前的工具確認**
     -   確認 `context7` 工具可用 (在 tools 列表中)
     -   如果 context7 不可用，警告使用者指導文件品質會受限
-    -   規劃將在步驟 2 中使用 context7 進行深度技術分析
+    -   context7 會在步驟 2 深度技術分析時使用
 
 1.  **檢查現有的指導文件**
     -   尋找 `.bmad-core\steering\` 目錄
@@ -23,19 +30,24 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
     -   如果存在，載入並顯示目前內容
 
 2.  **分析專案**
-    -   **第一階段：基礎分析** 檢閱程式碼庫以了解：
+    -   **第一階段：基礎分析**  
+
+        **檢閱程式碼庫以了解：**
         -   專案類型和目的
         -   使用的技術堆疊
         -   目錄結構和模式
         -   編碼慣例
         -   現有功能和特性
-    -   尋找：
-        -   package.json、requirements.txt、go.mod 等
+        -   建置和部署設定
+        -   測試套件和覆蓋率
+        
+        **尋找：**
+        -   套件依賴項和版本
         -   README 檔案
-        -   設定檔
+        -   設定檔和環境設定
         -   原始碼結構
     
-    -   **第二階段：深度技術分析** ⚠️ **必須執行**
+    -   **第二階段：深度技術分析** (必須執行)  
         -   **識別主要函式庫**：從專案檔案中提取所有重要的第三方函式庫
         -   **使用 context7 工具**：對每個主要函式庫執行以下操作：
             1. 使用 `resolve-library-id` 找到正確的函式庫 ID
@@ -64,7 +76,8 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
         - [推斷的模式 1]
         - [推斷的模式 2]
         ```
-    -   詢問：「這些推斷的細節看起來正確嗎？請告訴我哪些要保留或捨棄。」
+    -   詢問：「這些推斷的細節看起來正確嗎？請告訴我哪些要保留或捨棄。」  
+    -   **註記**：若仍有不足或不清楚之處，將在下一步（第 4 步）收集缺失資訊。
 
 4.  **收集缺失的資訊**
     -   根據使用者回饋，找出差距
@@ -88,18 +101,24 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
 
 5.  **產生指導文件**
     -   如果 `.bmad-core\steering\` 目錄不存在，則建立它
-    -   根據範本和收集到的資訊產生三個檔案：
+    -   根據 template 和收集到的資訊產生三個檔案：
 
-        **product.md**：產品願景、使用者、功能、目標 (by `.bmad\templates\product-template.md` )
+        **product.md**：
+        - 由 `.bmad\templates\product-template.md` 範本產生，嚴格遵循其結構與章節
+        - 產品願景、使用者、功能、目標 
         
-        **tech.md**：技術堆疊、工具、限制、決策 (by `.bmad\templates\tech-template.md` )
+        **tech.md**：
+        - 由 `.bmad\templates\tech-template.md` 範本產生，嚴格遵循其結構與章節
+        - 技術堆疊、工具、限制、決策  
         ⚠️ **必須包含** 從 context7 獲得的函式庫最佳實踐章節：
         - 每個主要函式庫的具體使用指導
         - 官方推薦的程式碼模式
         - 常見錯誤和避免方法
         - 效能最佳化建議
         
-        **structure.md**：檔案組織、命名慣例、模式 (by `.bmad\templates\structure-template.md` )
+        **structure.md**：
+        - 由 `.bmad\templates\structure-template.md` 範本產生，嚴格遵循其結構與章節
+        - 檔案組織、命名慣例、模式  
         ⚠️ **必須包含** 基於 context7 的實際程式碼範例章節
 
 6.  **檢閱並確認**
@@ -116,38 +135,33 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
 
 ## 🚨 Context7 強制要求
 
-**在技術分析階段，你必須：**
-
-1. **識別所有主要函式庫**：掃描 .csproj、package.json、requirements.txt 等檔案
-2. **對每個函式庫執行 context7 查詢**：
-   - 先用 `resolve-library-id` 確認函式庫 ID
-   - 再用 `get-library-docs` 取得最佳實踐
-   - 專注於專案實際使用的功能模式
-3. **整合到指導文件中**：
-   - tech.md 必須包含「函式庫最佳實踐」章節
-   - structure.md 必須包含具體程式碼範例
-   - 不能僅靠推測或一般知識
+**重點提醒：**
+- tech.md 必須包含「函式庫最佳實踐」章節  
+- structure.md 必須包含具體程式碼範例  
+- 不得僅靠推測或一般知識  
 
 **如果跳過 context7：**
-- 指導文件將缺乏準確性和最新性  
-- 無法提供具體的程式碼模式
+- 文件將缺乏準確性與最新性  
+- 無法提供具體的程式碼模式  
 - 團隊可能使用過時或不當的實踐
 
 **檢查清單：**
-- [ ] 已識別所有主要第三方函式庫
+- [ ] 已識別所有主要第三方函式庫  
 - [ ] 已對每個函式庫執行 context7 查詢  
-- [ ] 已將最佳實踐整合到指導文件中
-- [ ] 已提供具體程式碼範例而非抽象建議
+- [ ] 已將最佳實踐整合到指導文件中  
+- [ ] 已提供具體程式碼範例而非抽象建議  
 
 ## Example Flow
 
-1.  分析專案並發現它是一個 React/TypeScript 應用程式
-2.  呈現有關電子商務平台的推斷細節
-3.  使用者確認大部分細節，但澄清了目標市場
-4.  詢問效能要求和第三方服務
-5.  使用所有收集到的資訊產生指導文件
-6.  使用者檢閱並批准文件
-7.  儲存到 `.bmad-core\steering\` 目錄
+以下為上述流程的案例化展示：
+
+1.  分析專案並發現它是一個 React/TypeScript 應用程式  
+2.  呈現有關電子商務平台的推斷細節  
+3.  使用者確認大部分細節，但澄清了目標市場  
+4.  詢問效能要求和第三方服務  
+5.  使用所有收集到的資訊產生指導文件  
+6.  使用者檢閱並批准文件  
+7.  儲存到 `.bmad-core\steering\` 目錄  
 
 ## Next Steps
 建立指導文件後，它們將在以下指令中自動被參考：
@@ -155,3 +169,20 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
 -   `/spec-design` - 遵循既定的技術模式
 -   `/spec-tasks` - 使用正確的檔案組織
 -   `/spec-execute` - 遵循所有慣例進行實作
+
+## CRITICAL REMINDERS
+
+**❌ NEVER：**
+-   假設或推測函式庫使用方式
+-   假設使用者了解技術細節
+-   在未經使用者批准前儲存文件
+
+**✅ ALWAYS：**
+-   嚴格遵循範本結構  
+-   維護文件的持續性和相關性  
+-   敏感資訊禁止納入  
+-   在儲存前獲得使用者批准  
+-   每個文件都應專注於其特定領域  
+-   定期更新以反映專案的演變  
+-   使用清晰、簡潔的語言  
+-   使用範例和具體細節來增強理解  

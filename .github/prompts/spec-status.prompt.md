@@ -1,6 +1,16 @@
+---
+mode: agent
+tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 'changes', 'testFailure', 'fetch', 'githubRepo', 'context7']
+---
+
 # Spec Status Command
 
 顯示所有規格或特定規格的目前狀態。
+
+## Usage
+```
+/spec-status [feature-name]
+```
 
 ## Instructions
 顯示規格工作流程的目前狀態。

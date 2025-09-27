@@ -1,6 +1,16 @@
+---
+mode: agent
+tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 'changes', 'testFailure', 'fetch', 'githubRepo', 'context7']
+---
+
 # Spec List Command
 
 列出目前專案中的所有規格。
+
+## Usage
+```
+/spec-list
+```
 
 ## Instructions
 顯示專案中所有規格的完整清單。

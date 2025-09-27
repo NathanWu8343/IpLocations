@@ -7,6 +7,11 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
 
 依照已批准的需求文件，產生完整且符合專案規範的設計文件。
 
+## Usage
+```
+/spec-design [feature-name]
+```
+
 ## Instructions
 您正在處理規格工作流程的 **設計階段**，請嚴格依照流程完成。
 
