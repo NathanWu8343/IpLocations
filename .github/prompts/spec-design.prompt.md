@@ -14,10 +14,10 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
 
 1. **先決條件檢查**
    - 確認 `.bmad-core\specs\{feature-name}\requirements.md` 檔案存在，且內容已獲使用者批准。
-   - 載入 `requirements.md` 作為設計依據。
    - 若檔案不存在或未經批准，立即中止並提示使用者：  
      「請先執行 `/spec-create` 或提供 requirements.md，才能進入設計階段。」
-
+   - 加載 `requirements.md` 作為設計依據。
+   
 2. **載入指導文件**
    - `.bmad-core\steering\product.md` → 產品願景與目標  
    - `.bmad-core\steering\tech.md` → 技術標準與模式  

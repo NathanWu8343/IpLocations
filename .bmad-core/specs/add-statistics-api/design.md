@@ -1,149 +1,202 @@
-# 設計文件：API 點擊統計
+### **設計文件: `add-statistics-api`**
 
-## 總覽
+#### **1. 整體架構與流程**
 
-「API 點擊統計」功能為 IpLocations API 新增統計追蹤能力。此功能將在每次成功的 IP 地區查詢後，自動記錄對應國家代碼的點擊次數，並提供一個新的 API 端點 `GET /api/statistics` 來獲取按點擊次數排序的國家統計數據。
-
-此功能完全整合到現有的 IP 查詢流程中，不影響原有的效能要求，並利用現有的 Redis 基礎設施進行資料儲存。
-
-## 指導文件一致性
-
-### 技術標準 (tech.md)
-
-本設計嚴格遵循已記載的技術模式：
-
-- **分層架構**：新增的 `StatisticsStore` 位於 Infrastructure 層，遵循現有的 `IpRangeStore` 模式
-- **相依性注入**：使用建構函式注入，在 `Program.cs` 中註冊服務
-- **非同步程式設計**：所有 Redis 操作使用 `async/await` 模式
-- **Redis 最佳實踐**：使用 `IConnectionMultiplexer` 單例模式，利用 `Hash` 資料結構進行高效統計操作
-- **錯誤處理**：遵循現有的錯誤處理模式，服務層回傳可識別的失敗狀態
-
-### 專案結構 (structure.md)
-
-實作將完全遵循專案組織慣例：
-
-- 新控制器：`src/IpLocations.Api/Controllers/StatisticsController.cs`
-- 新基礎設施服務：`src/IpLocations.Api/Infra/StatisticsStore.cs`
-- 擴充常數定義：在 `src/IpLocations.Api/Constants/RedisKeyConst.cs` 中新增統計相關的 Redis Key
-- 測試組織：遵循現有的單元測試與整合測試結構
-
-## 程式碼重用分析
-
-### 可利用的現有元件
-
-- **IConnectionMultiplexer**：直接重用現有的 Redis 連線管理
-- **RedisKeyConst**：擴充此類別以定義統計功能的 Redis Key 常數
-- **控制器基礎模式**：複製 `IpLocationsController` 的結構和風格
-- **服務註冊模式**：遵循 `Program.cs` 中現有的服務註冊方式
-- **測試基礎設施**：重用 `BaseIntegrationTest` 和 `IntegrationTestWebAppFactory`
-
-### 整合點
-
-- **IpLocationsController**：需要注入 `StatisticsStore` 並在成功查詢後記錄統計
-- **Redis 資料庫**：統計數據與現有 IP 範圍資料共用同一個 Redis 實例
-- **相依性注入容器**：在 `Program.cs` 中註冊新的 `StatisticsStore` 服務
-- **測試容器**：重用現有的 Testcontainers Redis 設定
-
-## 架構
-
-統計功能採用事件驅動的架構，在 IP 查詢成功後異步記錄統計：
+新功能將整合至現有 API 架構中。下方圖表展示了兩個主要流程：記錄統計與查詢統計。
 
 ```mermaid
-graph TD
-    A[Client Request] --> B[IpLocationsController.Get]
-    B --> C[IpRangeStore.GetCountryAsync]
-    C --> D{Country Found?}
-    D -->|Yes| E[Return Country Code]
-    D -->|No| F[Return NotFound]
-    E --> G[StatisticsStore.IncrementCountryAsync]
-    G --> H[Redis Hash HINCRBY]
-    
-    I[Statistics Request] --> J[StatisticsController.Get]
-    J --> K[StatisticsStore.GetStatisticsAsync]
-    K --> L[Redis Hash HGETALL]
-    L --> M[Sort by Count DESC]
-    M --> N[Return JSON Array]
-    
-    subgraph "Redis"
-        H --> O[statistics:country-clicks Hash]
-        L --> O
+sequenceDiagram
+    participant User
+    participant IpLocationsController
+    participant StatisticsStore
+    participant Redis
+
+    %% Flow 1: Increment Statistics %%
+    User->>+IpLocationsController: GET /api/IpLocations?ip={ip}
+    IpLocationsController->>IpLocationsController: (Existing logic to find country)
+    alt Found
+        IpLocationsController->>+StatisticsStore: IncrementCountAsync("TW")
+        StatisticsStore->>+Redis: HINCRBY statistics:countries "TW" 1
+        Redis-->>-StatisticsStore: (New count)
+        StatisticsStore-->>-IpLocationsController: 
+        IpLocationsController->>-User: 200 OK ("TW")
+    else Not Found
+        IpLocationsController->>-User: 404 Not Found
     end
+
+    %% Flow 2: Get Statistics %%
+    participant StatisticsController
+    User->>+StatisticsController: GET /api/statistics
+    StatisticsController->>+StatisticsStore: GetAllCountsAsync()
+    StatisticsStore->>+Redis: HGETALL statistics:countries
+    Redis-->>-StatisticsStore: (Hash entries)
+    StatisticsStore-->>-StatisticsController: Dictionary<string, long>
+    StatisticsController->>-User: 200 OK (JSON Response)
 ```
 
-## 元件與介面
+#### **2. 檔案變更**
 
-### StatisticsStore
-- **目的**：管理國家代碼點擊統計的儲存與檢索
-- **介面**：
-  - `Task IncrementCountryAsync(string countryCode)`: 增加特定國家代碼的點擊計數
-  - `Task<List<CountryStatistic>> GetStatisticsAsync()`: 獲取所有國家統計並按點擊次數降序排序
-- **依賴**：`IConnectionMultiplexer` (與現有的 `IpRangeStore` 相同模式)
-- **重用**：基於 `IpRangeStore` 的結構和 Redis 操作模式
+*   **新建**:
+    *   `src/IpLocations.Api/Controllers/StatisticsController.cs`: 處理統計查詢的 API 端點。
+    *   `src/IpLocations.Api/Infra/StatisticsStore.cs`: 封裝與 Redis 統計資料互動的邏輯。
+*   **修改**:
+    *   `src/IpLocations.Api/Controllers/IpLocationsController.cs`: 注入 `StatisticsStore` 並在成功查詢後呼叫計數方法。
+    *   `src/IpLocations.Api/Constants/RedisKeyConst.cs`: 新增統計用的 Redis Key。
+    *   `src/IpLocations.Api/Program.cs`: 註冊 `StatisticsStore` 服務。
 
-### StatisticsController
-- **目的**：提供統計查詢的 REST API 端點
-- **介面**：
-  - `GET /api/statistics`: 回傳國家代碼統計的 JSON 陣列
-- **依賴**：`StatisticsStore`
-- **重用**：複製 `IpLocationsController` 的結構、命名慣例和錯誤處理模式
+#### **3. API 介面定義**
 
-### IpLocationsController (修改)
-- **目的**：在現有功能基礎上新增統計記錄
-- **修改**：注入 `StatisticsStore`，在成功查詢後調用 `IncrementCountryAsync`
-- **重用**：保持現有的所有邏輯和 API 契約不變
+*   **`GET /api/statistics`**
+    *   **描述**: 取得所有國家代碼的查詢次數統計。
+    *   **成功回應 (200 OK)**:
+        ```json
+        {
+          "TW": 1024,
+          "CA": 512,
+          "CN": 256
+        }
+        ```
+    *   **無資料時的回應 (200 OK)**:
+        ```json
+        {}
+        ```
 
-## 資料模型
+#### **4. 資料模型 (Redis)**
 
-### CountryStatistic (回應模型)
+*   **資料結構**: `Hash`
+*   **Key**: `statistics:countries` (將定義於 `RedisKeyConst`)
+*   **Field**: 國家代碼 (例如: `"TW"`)
+*   **Value**: 查詢次數 (例如: `1024`)
+
+#### **5. 元件設計**
+
+**a. `RedisKeyConst.cs`**
+
 ```csharp
-public record CountryStatistic
+namespace IpLocations.Api.Constants
 {
-    public string CountryCode { get; init; } = string.Empty;
-    public long Count { get; init; }
+    public static class RedisKeyConst
+    {
+        // ... existing keys ...
+        public const string CountryStatistics = "statistics:countries";
+    }
 }
 ```
 
-### Redis 資料結構
-- **Key**: `statistics:country-clicks` (Hash 類型)
-- **Hash Fields**: 國家代碼 (例如: "TW", "CN", "CA")
-- **Hash Values**: 點擊次數 (Long 類型)
-- **範例**: `{"TW": "120", "CN": "80", "CA": "100"}`
+**b. `StatisticsStore.cs`**
 
-## 錯誤處理
+```csharp
+using StackExchange.Redis;
+using System.Threading.Tasks;
 
-### 錯誤情境
+namespace IpLocations.Api.Infra
+{
+    public class StatisticsStore
+    {
+        private readonly IDatabase _db;
 
-1. **統計記錄失敗**
-   - **處理**：記錄操作採用 "fire-and-forget" 模式，失敗不影響主要 IP 查詢功能
-   - **使用者影響**：使用者完全不受影響，IP 查詢照常回傳結果
+        public StatisticsStore(IConnectionMultiplexer connectionMultiplexer)
+        {
+            _db = connectionMultiplexer.GetDatabase();
+        }
 
-2. **統計查詢時 Redis 不可用**
-   - **處理**：`GetStatisticsAsync` 回傳空集合
-   - **使用者影響**：API 回傳空陣列 `[]`，HTTP 200 狀態碼
+        public async Task IncrementCountAsync(string countryCode)
+        {
+            // 使用 HINCRBY 原子性地增加計數
+            await _db.HashIncrementAsync(RedisKeyConst.CountryStatistics, countryCode, 1);
+        }
 
-3. **無效的統計資料**
-   - **處理**：在 `GetStatisticsAsync` 中過濾掉無效的計數值
-   - **使用者影響**：使用者只看到有效的統計資料
+        public async Task<Dictionary<string, long>> GetAllCountsAsync()
+        {
+            var entries = await _db.HashGetAllAsync(RedisKeyConst.CountryStatistics);
+            var result = new Dictionary<string, long>();
+            foreach (var entry in entries)
+            {
+                result[entry.Name] = (long)entry.Value;
+            }
+            return result;
+        }
+    }
+}
+```
 
-## 測試策略
+**c. `StatisticsController.cs`**
 
-### 單元測試
-- **StatisticsStore 測試**：
-  - 測試 `IncrementCountryAsync` 的 Redis HINCRBY 操作
-  - 測試 `GetStatisticsAsync` 的排序邏輯
-  - 測試邊界情況（空資料、無效計數）
-- **StatisticsController 測試**：
-  - 測試 API 回應格式
-  - 測試空資料情況
+```csharp
+using IpLocations.Api.Infra;
+using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
-### 整合測試
-- **完整流程測試**：
-  1. 調用 IP 查詢 API
-  2. 驗證統計已被記錄
-  3. 調用統計 API 驗證資料
-- **多次查詢累積測試**：驗證點擊次數正確累積
-- **排序功能測試**：驗證統計結果按點擊次數降序排列
+namespace IpLocations.Api.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class StatisticsController : ControllerBase
+    {
+        private readonly StatisticsStore _statisticsStore;
 
-### 效能測試
-- **統計記錄效能**：確保統計記錄不影響 IP 查詢 API 的回應時間
-- **統計查詢效能**：驗證統計 API 在大量資料下的回應時間符合 NFR-002 (200ms 內)
+        public StatisticsController(StatisticsStore statisticsStore)
+        {
+            _statisticsStore = statisticsStore;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var result = await _statisticsStore.GetAllCountsAsync();
+            return Ok(result);
+        }
+    }
+}
+```
+
+**d. `IpLocationsController.cs` (修改)**
+
+```csharp
+// ... using statements ...
+public class IpLocationsController : ControllerBase
+{
+    private readonly IpRangeStore _ipRangeStore;
+    private readonly StatisticsStore _statisticsStore; // 新增
+
+    // 修改建構函式
+    public IpLocationsController(IpRangeStore ipRangeStore, StatisticsStore statisticsStore)
+    {
+        _ipRangeStore = ipRangeStore;
+        _statisticsStore = statisticsStore; // 新增
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Get(string ip)
+    {
+        var result = await _ipRangeStore.GetCountryAsync(ip);
+        if (string.IsNullOrEmpty(result))
+        {
+            return NotFound();
+        }
+
+        // 新增：記錄統計
+        await _statisticsStore.IncrementCountAsync(result);
+
+        return Ok(result);
+    }
+}
+```
+
+**e. `Program.cs` (修改)**
+
+```csharp
+// ... existing code ...
+builder.Services.AddSingleton<IpRangeStore>();
+builder.Services.AddSingleton<StatisticsStore>(); // 新增服務註冊
+// ... existing code ...
+```
+
+#### **6. 測試策略**
+
+*   **單元測試 (`IpLocations.UnitTests`)**:
+    *   為 `StatisticsStore` 建立測試，使用 `Moq` 或類似框架模擬 `IDatabase` 介面，驗證 `HashIncrementAsync` 與 `HashGetAllAsync` 是否被正確呼叫。
+*   **整合測試 (`IpLocations.IntegrationTests`)**:
+    *   建立 `StatisticsControllerTests`，繼承自 `BaseIntegrationTest`。
+    *   測試 `GET /api/statistics` 端點，驗證其回傳正確的狀態碼與 JSON 結構。
+    *   修改 `GetIpLocationsTests`，在成功呼叫 `GET /api/IpLocations` 後，再呼叫 `GET /api/statistics`，驗證對應國家的計數是否已增加。

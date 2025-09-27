@@ -5,93 +5,69 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
 
 # Spec Tasks Command
 
-根據批准的設計生成實作任務列表。
-
+根據已批准的設計文件，產生完整且可執行的實作任務列表。
 
 ## Instructions
-您正在處理 spec 工作流程的任務階段。
+您正在處理規格工作流程的 **任務階段**，請嚴格依照以下步驟執行。
 
-**WORKFLOW**: 這是命令生成之前的最後一個步驟。
-**SEQUENCE**: Create Tasks → Get Approval → Ask User → Generate Commands
-**DO NOT** 在任務被批准前運行任務命令生成。
+## Processing Flow
 
-1. **先決條件**
-   - 確保 design.md 存在且已被批准
-   - 加載 requirements.md 和 design.md 以獲取上下文
-   - **加載 structure.md**: 檢查專案結構慣例
-   - 理解完整的功能範圍
+1. **先決條件檢查**
+   - 確認 `.bmad-core\specs\{feature-name}\design.md` 檔案存在且已獲得使用者批准。
+   - 若檔案不存在或未經批准，立即中止並提示使用者：  
+     「請先執行 `/spec-design` 或提供 design.md，才能進入任務階段。」
+   - 載入 `requirements.md` 與 `design.md`，確保任務能完整追溯至需求與設計。
 
-2. **生成任務列表** (優先考慮程式碼重用並遵循慣例)
-   - 將設計分解為原子級、可執行的編碼任務
-   - **遵循 structure.md**: 確保任務尊重專案文件組織
-   - **優先擴展/修改現有程式碼**，而不是從頭開始構建
-   - 使用帶有編號層級的複選框格式
-   - 每個任務都應引用具體的需求和要利用的現有程式碼
-   - 僅專注於編碼任務 (不包括部署、使用者測試等)
+2. **載入指導文件**
+   - `.bmad-core\steering\product.md` → 產品願景與目標  
+   - `.bmad-core\steering\tech.md` → 技術標準與模式  
+   - `.bmad-core\steering\structure.md` → 專案結構慣例  
+   - 任務必須明確符合這些文件的規範，並在必要時標示引用。
 
-3. **任務指南**
-   - 任務應該是具體且可操作的
-   - **引用現有程式碼以供重用**: 包括要擴展或修改的具體文件/組件
-   - 包括具體的文件名和組件
-   - 漸進式構建 (每個任務都建立在前一個任務之上)
-   - 使用 _Requirements: X.Y_ 格式引用需求
-   - 採用測試驅動開發方法，利用現有的測試模式
+3. **生成任務列表**  
+   （強制遵循 **程式碼重用優先** 與 **專案慣例**）
+   - 使用 `.bmad-core\templates\tasks-template.md` 作為格式範本。
+   - 任務必須拆解為 **原子級、可執行的編碼步驟**。
 
-4. **Task Format**
-   ```markdown
-   - [ ] 1. Task description
-     - Sub-bullet with details
-     - Specific files to create/modify
-     - _Leverage: existing-component.ts, utils/helpers.js_
-     - _Requirements: 1.1, 2.3_
-   ```
+   **原子化任務規範：**
+   - **檔案範圍**：單一任務影響的檔案數 ≤ 3。  
+   - **完成時間**：有經驗的工程師可於 15–30 分鐘內完成。  
+   - **單一目的**：每個任務只產出一個明確、可測試的結果。  
+   - **指定檔案**：必須明確列出要建立或修改的檔案名稱。  
+   - **代理程式友善**：明確定義輸入/輸出，避免跨領域切換。  
 
-5. **排除的任務**
-   - 使用者驗收測試
-   - 部署到生產環境
-   - 效能指標收集
-   - 使用者培訓或文件
-   - 業務流程變更
+   **範例：**
+   - ❌ 不佳：「實作驗證系統」  
+   - ✅ 佳：「在 `models/user.py` 中建立具備 email 與 password 欄位的 `User` 模型」  
+   - ❌ 不佳：「新增使用者管理功能」  
+   - ✅ 佳：「在 `utils/auth.py` 中使用 bcrypt 新增密碼雜湊工具函式」  
 
-6. **批准流程**
-   - 提交完整的任務列表
-   - 詢問：「這些任務看起來可以嗎？」
-   - 根據回饋進行修訂
-   - 繼續直到獲得明確批准
+   **實作指引：**
+   - **遵循 structure.md**：任務必須符合專案目錄與檔案命名慣例。  
+   - **優先擴充/調整既有程式碼**，僅在必要時新增檔案或模組。  
+   - 僅包含 **編碼相關工作**。以下不得出現：  
+     * 使用者驗收測試 (UAT)  
+     * 部署/CI/CD 流程  
+     * 效能監控與度量  
+     * 使用者訓練或文件撰寫  
+     * 業務流程或管理變更  
 
-7. **生成任務命令** (僅在任務批准後)
-   - **等待**: 在使用者明確批准任務之前，不要運行命令生成
-   - **詢問使用者**: 「您希望我為每個任務生成單獨的命令以便於執行嗎？ (yes/no)」
-   - **如果是**: 執行 `npx @pimzino/claude-code-spec-workflow@latest generate-task-commands {feature-name}`
-   - **如果否**: 繼續使用傳統的 `/spec-execute` 方法
-   - **目的**: 在 `.claude/commands/{feature-name}/` 中創建單獨的任務命令
-   - **結果**: 每個任務都有自己的命令： `/{feature-name}-task-{task-id}`
-   - **範例**: 創建 `/{feature-name}-task-1`, `/{feature-name}-task-2.1` 等。
-   - **跨平台**: 自動適用於 Windows、macOS 和 Linux
-   - **需要重啟**: 通知使用者重啟 Claude Code 以使新命令可見
+4. **批准流程**
+   - 呈現完整的任務列表給使用者審閱。
+   - 詢問使用者確認：「這些任務看起來可以嗎？」
+   - 收集回饋並進行修訂，直到獲得明確批准。
 
-## Task Structure
-```markdown
-# Implementation Plan
+## CRITICAL REMINDERS
 
-- [ ] 1. 設置專案結構
-  - 遵循現有模式創建目錄結構
-  - 擴展現有基底類別來定義核心介面
-  - _Leverage: src/types/base.ts, src/models/BaseModel.ts_
-  - _Requirements: 1.1_
+**❌ 絕對禁止：**
+- 未經使用者批准，不得進入後續階段。
+- 任務階段完成前，不得自行產生實作程式碼或部署腳本。
 
-- [ ] 2. 實作資料模型
-- [ ] 2.1 創建基底模型類別
-  - 擴展現有的驗證工具
-  - 使用現有的測試輔助工具編寫單元測試
-  - _Leverage: src/utils/validation.ts, tests/helpers/testUtils.ts_
-  - _Requirements: 2.1, 2.2_
-```
+**✅ 必須遵守：**
+- 任務需完整追溯至需求與設計。
+- 嚴格遵循 product.md、tech.md、structure.md 的規範。
 
 ## Next Phase
-在批准和命令生成之後：
-1. **重啟 Claude Code** 以使新命令可見
-2. 然後您可以：
-   - 使用 `/spec-execute` 來實作任務
-   - 使用單獨的任務命令： `/{feature-name}-task-1`, `/{feature-name}-task-2`, 等。
+在任務列表獲得批准後，您可以選擇：  
+   - 使用 `/spec-execute 1 {feature-name}` 執行任務  
    - 使用 `/spec-status {feature-name}` 檢查進度
