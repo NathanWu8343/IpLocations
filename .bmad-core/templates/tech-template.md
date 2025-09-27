@@ -3,6 +3,12 @@
 ## 專案類型
 [描述這是一個什麼樣的專案：網站應用程式、CLI 工具、桌面應用程式、行動應用程式、函式庫、API 服務、嵌入式系統、遊戲等]
 
+## 版本歷史
+
+| Date   | Version | Description                 | Author       |
+| ------ | ------- | --------------------------- | ------------ |
+| [Date] | 1.0     | Initial                     | [Model Name] |
+
 ## 核心技術
 
 ### 主要語言
@@ -25,8 +31,9 @@
 
 ### 外部整合 (如果適用)
 - **API**: [您整合的外部服務]
-- **協定**: [例如，HTTP/REST、gRPC、WebSocket、TCP/IP]
+- **協定**: [例如，HTTP/REST、gRPC、WebSocket、TCP/IP、SDK]
 - **驗證**: [例如，OAuth、API 金鑰、憑證]
+- **檔案位置**: [例如，`src/services/emailService.js`]
 
 ### 監控與儀表板技術 (如果適用)
 - **儀表板框架**: [例如，React、Vue、原生 JS、終端機 UI]
