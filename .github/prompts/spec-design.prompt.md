@@ -9,7 +9,7 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
 
 ## Usage
 ```
-/spec-design [feature-name]
+/spec-design <feature-name>
 ```
 
 ## Instructions
