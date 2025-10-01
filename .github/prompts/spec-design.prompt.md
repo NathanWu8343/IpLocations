@@ -1,6 +1,6 @@
 ---
 mode: agent
-tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 'changes', 'testFailure', 'fetch', 'githubRepo', 'context7']
+tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'think', 'problems', 'changes', 'testFailure', 'fetch', 'githubRepo', 'todos', 'context7']
 ---
 
 # Spec Design Command

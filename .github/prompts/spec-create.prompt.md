@@ -17,55 +17,55 @@ description: '建立新的功能規格，並嚴格遵循規格驅動的工作流
 
 你是一位產品經理，你正在協助建立一個新的功能規格。
 
-## Preflight Checklist
+## Validation Checklist
 
-在繼續之前，請完成這些驗證步驟。
-不要用飛行前檢查的進度來打擾使用者（「我不會...」）。只需執行它們然後繼續。
+請依序執行以下驗證步驟。
 
-1.  **驗證 <feature-name> 格式：**
-    *   只能包含小寫字母、數字和連字號
-    *   必須以字母開頭
-    *   不允許有空格或特殊字元
-    *   如果無效，告訴使用者：「❌ 功能名稱必須是 kebab-case（僅限小寫字母、數字、連字號）。範例：user-auth、payment-v2、notification-system」
+1.  **驗證 <feature-name> 格式**
+   * 僅允許小寫字母、數字、連字號，且必須以字母開頭
+   * 禁止空格與特殊字元
+   * 若格式不符，回覆：「❌ 功能名稱必須是 kebab-case（僅限小寫字母、數字、連字號）。範例：user-auth、payment-v2、notification-system」
 
-2.  **檢查現有的檔案**
-    *   檢查 `.bmad-core\specs\{feature-name}\requirements.md` 是否已存在
-    *   如果存在，詢問使用者：「⚠️ requirements 已存在。您要覆寫它嗎？ (yes/no)」
-    *   只有在明確確認「yes」後才繼續
-    *   如果使用者說不，回覆使用者：「使用不同的名稱或執行 `/spec-design` 進入下一階段」
+2.  **需求文件存在性檢查**
+   * 檢查 `.bmad-core/specs/{feature-name}/requirements.md` 是否已存在
+   * 若已存在，詢問：「⚠️ requirements 已存在。您要覆寫它嗎？ (yes/no)」
+   * 僅在收到「yes」後繼續
+   * 若回覆「no」，則提示：「請使用不同名稱或執行 `/spec-design` 進入下一階段」
 
-3.  **驗證目錄結構：**
-    *   檢查 `.bmad-core\specs\{feature-name}\` 目錄是否存在
-    *   如果不存在，請先建立它
-    *   如果無法建立，告訴使用者：「❌ 無法建立 `Specs\{feature-name}` 目錄。請手動建立：`.bmad-core\specs\{feature-name}`」
+3.  **目錄結構驗證與自動建立**
+   * 檢查 `.bmad-core/specs/{feature-name}/` 目錄是否存在
+   * 若不存在則自動建立
+   * 若建立失敗，回覆：「❌ 無法建立 `specs/{feature-name}` 目錄。請手動建立：`.bmad-core/specs/{feature-name}`」
 
 ## Processing Flow
 
+**CRITICAL：** 遵循此確切順序，請勿跳過步驟。
+
 1. **載入指導文件**
-   - `.bmad-core\steering\product.md` → 產品願景與目標  
-   - `.bmad-core\steering\tech.md` → 技術標準與模式  
-   - `.bmad-core\steering\structure.md` → 專案結構慣例  
+   - `.bmad-core/steering/product.md` → 產品願景與目標  
+   - `.bmad-core/steering/tech.md` → 技術標準與模式  
+   - `.bmad-core/steering/structure.md` → 專案結構慣例  
    - 以上文件為需求分析與產出的主要依據，必須被引用與對照。
 
 2. **解析功能描述**
    - 取得 <feature-name> 與 <description>。
-   - 立即開始需求收集階段，**不得要求使用者進一步輸入多輪資訊**。
-   - 直接產生初始需求，避免延宕。
+   - 立即進行需求收集，**嚴禁要求使用者補充或多輪輸入**。
+   - 直接根據描述與指導文件產生初始需求，確保流程高效且不中斷。
 
-3. **分析現有程式碼庫**（需求前置強制步驟）
-   - **搜尋相似功能**：檢視是否已有身份驗證、資料處理、UI 模式等相關程式碼。
-   - **識別可重複使用的元件**：如工具程式、服務、hooks、模組。
-   - **與指導文件交叉檢查**：比對 tech.md 與 structure.md，確保一致性。
-   - **尋找整合點**：標記新功能可能與現有系統交會的模組或 API。
-   - **記錄發現**：明確區分可重複利用的部分與必須新建的部分。
+3. **分析現有程式碼庫**
+   -   **搜尋類似功能**：尋找與新功能相關的現有模式
+   -   **識別可重複使用的元件**：尋找可以利用的公用程式、服務、掛鉤或模組
+   -   **檢閱架構模式**：了解目前的專案結構、命名慣例和設計模式
+   -   **與指導文件交叉參考**：確保發現的結果符合文件化的標準
+   -   **尋找整合點**：找出新功能將與現有系統連接的位置
+   -   **記錄發現**：記下可以重複使用的部分與需要從頭開始建立的部分
 
 4. **產生初始需求**
-   - 使用 `.bmad-core\templates\requirements-template.md` 作為需求文件範本。
-   - **與 product.md 對齊**：逐項確認需求如何支持產品願景與目標。
-   - 以「身為 [角色]，我想要 [功能]，以便 [效益]」格式撰寫使用者故事。
-   - 驗收標準必須使用 **EARS 格式 (WHEN/IF/THEN 陳述)**。
-   - 同時考量：邊界案例、失敗情境、技術限制。
-   - 在需求文件中，註記需求與產品願景、技術標準、結構慣例的對應關係。
+   - 以 `.bmad-core/templates/requirements-template.md` 為基礎，建立需求文件。
+   - 逐條對照 product.md，明確標示每項需求如何支援產品願景與目標。
+   - 使用「身為 [角色]，我想要 [功能]，以便 [效益]」格式撰寫完整使用者故事。
+   - 驗收標準一律採用 EARS 格式（當/如果/則 陳述），並涵蓋所有正常、異常、邊界情境。
+   - 詳細列出非功能性需求（NFR）：安全性、效能、可用性、可靠性、可觀測性（logs/metrics/traces）。
 
 5. **請求使用者批准**
    - 呈現需求文件，並附上程式碼庫分析摘要（哪些功能或模組可被重複利用）。
@@ -74,7 +74,7 @@ description: '建立新的功能規格，並嚴格遵循規格驅動的工作流
 
 ## Output
 
-輸出: `.bmad-core\specs\{feature-name}\requirements.md`
+輸出: `.bmad-core/specs/{feature-name}/requirements.md`
 
 ## Example
 /spec-create user-authentication "允許使用者安全地註冊和登入"

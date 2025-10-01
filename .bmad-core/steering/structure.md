@@ -1,129 +1,121 @@
-# 專案結構指導文件：IpLocations API
+## 版本歷史
 
-本文檔定義了 IpLocations API 的專案結構、檔案組織、命名慣例與編碼風格，旨在確保程式碼庫的一致性與可維護性。
+**CRITICAL**：每次更新請於表格下方新增一列，**不得覆蓋舊有紀錄**
 
----
+| 日期         | 版本號   | 描述             | 作者             |
+| ------------ | -------- | ---------------- | ---------------- |
+| 2025-09-30   | 1.2      | 驗證並確認結構指引內容正確性（配合 tech.md v1.2 更新） | GitHub Copilot   |
+| 2025-09-30   | 1.1      | 建立完整結構指引 | GitHub Copilot   |
+| 2025-09-29   | 1.0      | 初版建立         | GPT-5            |
 
-## 1. 目錄結構 (Directory Structure)
+## 目錄組織
 
-專案遵循功能導向的分層結構，將不同職責的程式碼分離到各自的目錄中。
+```
+IpLocations/
+├── IpLocations.sln
+├── README.md
+├── src/
+│   └── IpLocations.Api/
+│       ├── Controllers/
+│       │   └── IpLocationsController.cs
+│       ├── Infra/
+│       │   └── IpRangeStore.cs
+│       ├── Misc/
+│       │   └── IpConverter.cs
+│       ├── Constants/
+│       │   └── RedisKeyConst.cs
+│       ├── Models/                     # 預留資料契約位置（目前空）
+│       ├── Program.cs
+│       ├── appsettings*.json
+│       └── Dockerfile
+├── tests/
+│   ├── IpLocations.UnitTests/
+│   │   └── IpConverterTests.cs
+│   ├── IpLocations.IntegrationTests/
+│   │   ├── Abstractions/
+│   │   │   ├── BaseIntegrationTest.cs
+│   │   │   └── IntegrationTestWebAppFactory.cs
+│   │   └── IpLocations/
+│   │       └── GetIpLocationsTests.cs
+│   ├── Benchmark/
+│   │   └── IpToIntCalculationBenchmark.cs
+│   └── DebugTest/                       # 開發期間的暫存專案
+└── .bmad-core/
+    └── steering/                       # Steering 文件 (本次新增)
+```
 
--   `src/IpLocations.Api/`: 主 API 專案
-    -   `Controllers/`: 存放 ASP.NET Core API 控制器。每個控制器對應一組相關的 API 端點。
-    -   `Infra/`: 基礎設施層。包含與外部服務（如 Redis）或資料來源互動的類別。
-    -   `Constants/`: 存放應用程式範圍的常數，例如 Redis Key 的定義。
-    -   `Misc/`: 存放通用的工具或輔助類別，例如 `IpConverter`。
-    -   `Program.cs`: 應用程式的進入點，負責設定服務、相依性注入與中介軟體管線。
--   `tests/`: 測試專案
-    -   `IpLocations.UnitTests/`: 單元測試專案，專注於測試單一類別或方法的邏輯。
-    -   `IpLocations.IntegrationTests/`: 整合測試專案，用於測試多個元件協同工作的場景，特別是 API 端點與資料庫的互動。
-    -   `Benchmark/`: 效能基準測試專案，用於評估關鍵演算法的效能。
+## 命名慣例
 
-## 2. 命名慣例 (Naming Conventions)
+### 檔案
+- **類別/服務檔案**: 與公開類別同名，使用 PascalCase（例如 `IpRangeStore.cs`）。
+- **測試**: 使用 `{Subject}Tests.cs` 或 `{Feature}Tests.cs`。
+- **設定**: `appsettings.{Environment}.json`。
 
--   **類別與介面 (PascalCase)**:
-    -   控制器: `{Entity}Controller` (例如: `IpLocationsController`)
-    -   服務/儲存庫: `{Purpose}Store` (例如: `IpRangeStore`)
-    -   常數類別: `{Purpose}Const` (例如: `RedisKeyConst`)
--   **私有欄位 (camelCase with underscore prefix)**:
-    # 專案結構
+### 程式碼
+- **命名空間與類別**: PascalCase（`IpLocations.Api.Controllers`）。
+- **方法/函式**: PascalCase（C# 慣例）。
+- **參數與區域變數**: camelCase。
+- **私有欄位**: `_camelCase`。
+- **常數**: PascalCase 或 `const` 字首後使用 PascalCase（如 `IpToCountryRange`）。
 
-    ## 目錄組織
+## 匯入模式
 
-    ```
-    IpLocations/
-    ├── IpLocations.sln
-    ├── README.md
-    ├── src/
-    │   └── IpLocations.Api/               # 主 Web API 專案
-    │       ├── Constants/                 # 全域常數 (例如 Redis Key)
-    │       ├── Controllers/               # ASP.NET Core 控制器
-    │       ├── Infra/                     # 資料存取與外部整合
-    │       ├── Misc/                      # 公用工具 (例如 IpConverter)
-    │       ├── Models/                    # (保留) DTO 或 Record 類型
-    │       └── Program.cs                 # 應用程式進入點
-    └── tests/
-        ├── IpLocations.UnitTests/         # 單元測試 (xUnit + FluentAssertions)
-        ├── IpLocations.IntegrationTests/  # 整合測試 (Testcontainers + WebApplicationFactory)
-        └── Benchmark/                     # BenchmarkDotNet 效能量測
-    ```
+### 匯入順序
+1. 系統/框架命名空間 (`System`, `Microsoft.*`)
+2. 第三方套件 (`StackExchange.Redis` 等)
+3. 專案內命名空間 (`IpLocations.Api.*`)
 
-    ## 命名慣例
+### 模組/套件組織
+- 使用 .NET 隱含 usings；額外相依以 `using` 宣告於檔案頂部。
+- 不使用相對匯入；命名空間以專案根命名前綴（`IpLocations.Api`）。
 
-    ### 檔案
-    - **控制器**: `PascalCase` 名稱與類別同步，例如 `IpLocationsController.cs`。
-    - **服務/儲存庫**: `{Purpose}Store.cs`，例如 `IpRangeStore.cs`。
-    - **常數**: `{Purpose}Const.cs`，例如 `RedisKeyConst.cs`。
-    - **測試檔**: 與被測類別對應，如 `IpConverterTests.cs`、`GetIpLocationsTests.cs`。
+## 程式碼結構模式
 
-    ### 程式碼
-    - **類別、介面、紀錄**: `PascalCase`；介面採 `I` 前綴 (例如 `IConnectionMultiplexer`)。
-    - **方法與屬性**: `PascalCase`，如 `GetCountryAsync`、`ConnectionString`。
-    - **私有欄位**: `_camelCase`，例如 `_database`、`_logger`。
-    - **區域變數與參數**: `camelCase`，例如 `ipNum`、`startIp`。
-    - **常數**: `PascalCase` 置於 `const` 或 `static readonly` 成員中，集中於 `RedisKeyConst` 類別。
-    - **測試方法**: `MethodName_Should_ExpectedBehavior_When_Condition`，如 `GetCountryAsync_Should_Return_NotFound_When_IpIsUnknown`。
+### 模組/類別組織
+```
+1. using 與命名空間宣告
+2. 類別或 record 定義
+3. 常數與欄位
+4. 建構函式
+5. 公開方法
+6. 私有協助方法
+```
 
-    ## 匯入模式
+### 函式/方法組織
+- 先進行輸入驗證與邊界檢查。
+- 核心邏輯保持簡潔，善用早期返回。
+- 非同步操作使用 `async`/`await`，避免同步呼叫。
+- 以明確的 `return` 作為終止點，維持可讀性。
 
-    ### 匯入順序
-    1. `System.*` 命名空間
-    2. 第三方套件 (例如 `StackExchange.Redis`)
-    3. 專案內部命名空間 (例如 `IpLocations.Api.Infra`)
+### 檔案組織原則
+- 每個檔案維持單一主要類別/record。
+- 相關實作（例如 Redis 存取）集中於對應資料夾。
+- 公開 API 置於類別開頭，私有協助方法置於結尾。
 
-    所有檔案均使用 `implicit usings`，僅在需要額外命名空間時額外引入。禁止使用萬用字元 `*` 匯入。
+## 程式碼組織原則
+1. **單一職責**：Controller 僅負責 HTTP 轉換；資料操作交由 Store/Service。
+2. **模組化**：`Controllers`、`Infra`、`Misc` 分離關注點。
+3. **可測試性**：核心邏輯抽離至可單獨測試的類別（例如 `IpConverter`）。
+4. **一致性**：遵循現有命名與 DI 模式，避免引入新架構。
 
-    ### 模組/套件組織
-    - API 專案的命名空間根為 `IpLocations.Api`，依資料夾同步延伸，例如 `IpLocations.Api.Controllers`。
-    - 測試專案命名空間為 `IpLocations.UnitTests`、`IpLocations.IntegrationTests`，以被測模組為後綴。
+## 模組邊界
+- **API 層 (`Controllers`)**：負責路由、輸入驗證、回應格式。
+- **基礎設施層 (`Infra`)**：封裝 Redis 讀寫與 Warm-up 行為。
+- **工具層 (`Misc`)**：提供純函式或靜態工具（如 IP 轉換）。
+- **常數層 (`Constants`)**：集中維護 Redis Key 模板與共用常數。
+- **測試專案**：`UnitTests` 單獨測試工具/邏輯；`IntegrationTests` 以 `WebApplicationFactory` + `Testcontainers` 驗證端對端；`Benchmark` 用於性能追蹤。
 
-    ## 程式碼結構模式
+## 程式碼大小指南
+- **檔案**: 建議 ≤ 300 行；超出時考慮拆分模組。
+- **方法**: 建議 ≤ 40 行；若邏輯複雜，抽離為私有方法。
+- **巢狀深度**: 儘量控制在 3 層以內；使用早期返回減少巢狀。
+- **測試案例**: 使用 `[Theory]` 與多組資料取代重複測試方法。
 
-    ### 模組/類別組織
-    1. `using` 列表
-    2. 命名空間宣告
-    3. 類別或紀錄宣告
-    4. 常數與欄位
-    5. 建構函式與注入相依性
-    6. 公開方法
-    7. 私有輔助方法
+## 儀表板/監控結構 (如適用)
+- 目前無儀表板程式碼；如未來加入，建議於 `src/IpLocations.Dashboard/` 等獨立專案維護，透過 API 存取資料。
 
-    ### 函式/方法組織
-    - 開頭執行輸入驗證（例如 `string.IsNullOrWhiteSpace` 或 `IpConverter.IpToInt`）。
-    - 執行核心邏輯，保持流程平坦，避免深度巢狀。
-    - 統一使用 `async`/`await` 與 `Task` 回傳；同步輔助函式使用純函式介面。
-    - 錯誤或無效狀況以特定回傳值 (例如 `string.Empty`) 表示，呼叫端判斷後轉換成 HTTP 狀態碼。
-
-    ### 檔案組織原則
-    - 每個檔案僅包含單一公開類別/紀錄 (`IpConverter` 為靜態類別例外)。
-    - 測試檔與產品碼一一對應，並遵循 AAA (Arrange-Act-Assert) 分段註解。
-    - 公開 API (控制器動作) 儘量保持精簡，將邏輯委派給基礎設施或工具層。
-
-    ## 程式碼組織原則
-
-    1. **單一職責**：控制器負責 HTTP 流程；Redis 查詢集中於 `IpRangeStore`；轉換工具集中於 `IpConverter`。
-    2. **模組化**：Redis Key 與常數集中管理，避免重複字串；未來額外資料來源以新資料夾擴充。
-    3. **可測試性**：純函式 (`IpConverter`) 具備完整單元測試；控制器透過整合測試與 Redis 容器驗證端對端行為。
-    4. **一致性**：遵循官方 .NET 命名與非同步慣例，避免在同檔內混用不同風格。
-
-    ## 模組邊界
-    - **Controllers ↔ Infra**：控制器僅呼叫 `IpRangeStore` 公開方法，不直接觸及 Redis API。
-    - **Infra ↔ Utils**：`IpRangeStore` 依賴 `IpConverter` 進行 IP 轉換，維持 Redis 查詢邏輯專注。
-    - **Tests ↔ Production**：測試專案僅參考公開類別與介面；整合測試使用 `WebApplicationFactory` 與 Testcontainers 注入測試設定。
-    - **Constants**：所有 Redis Key 透過 `RedisKeyConst` 管理，避免魔術字串散落。
-
-    ## 程式碼大小指南
-    - **檔案大小**：控制器、Store 類別控制在 200 行內；工具類保持精簡。
-    - **方法大小**：一般不超過 40 行；複雜邏輯拆分為私有方法或純函式。
-    - **巢狀深度**：避免超過 3 層 if/loop；以提早返回與模式比對維持可讀性。
-    - **測試**：每個測試方法聚焦單一情境，資料驅動測試減少重複程式碼。
-
-    ## 儀表板/監控結構 (如適用)
-    - 目前無內建儀表板；建議建立獨立 `monitoring/` 資料夾（若日後需要），隔離後端核心程式碼。
-    - 將監控腳本或 Kusto 查詢範本放置於 `docs/monitoring` 以供營運團隊使用。
-
-    ## 文件標準
-    - 公開類別與方法須提供 XML `<summary>` 註解，以利 Swagger 與 IntelliSense。
-    - 複雜邏輯（例如 Redis 回傳解析）需附上行內中文註解說明處理步驟。
-    - 每個測試專案維持 `README` 或頂層註解，描述測試環境需求（如 Docker Desktop）。
-    {
+## 文件標準
+- 公開 Controller 與服務方法需加入 XML `<summary>`，描述用途與回傳行為。
+- 保留現有中文註解（例如 TODO），更新時同步調整。
+- 測試方法名稱採 `MethodName_Should_ExpectedBehavior_When_Condition`。
+- README 紀錄資料來源與效能基準；若新增功能需追加章節。

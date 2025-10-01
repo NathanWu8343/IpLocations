@@ -1,44 +1,47 @@
-# 需求文件
+# Requirements Document
 
-## 簡介
+## Introduction
 
 [提供功能的簡要概觀、其目的以及對使用者的價值]
 
-## 與產品願景的一致性
+## Alignment with Product Vision
 
-[解釋此功能如何支持 `product.md` 中概述的目標]
+[解釋此功能如何支持 product.md 中概述的目標]
 
-## 需求
+## Requirements
 
-### 需求 1
+### Requirement 1
 
-**使用者故事：** 身為 [角色]，我想要 [功能]，以便 [效益]
+**User Story:** 身為 [角色]，我想要 [功能]，以便 [效益]
 
-#### 驗收標準
+#### Acceptance Criteria
 
 1. 當 [事件] 發生時，則 [系統] 應 [回應]
 2. 如果 [先決條件] 成立，則 [系統] 應 [回應]
 3. 當 [事件] 發生且 [條件] 成立時，則 [系統] 應 [回應]
 
-### 需求 2
+### Requirement 2
 
-**使用者故事：** 身為 [角色]，我想要 [功能]，以便 [效益]
+**User Story:** 身為 [角色]，我想要 [功能]，以便 [效益]
 
-#### 驗收標準
+#### Acceptance Criteria
 
 1. 當 [事件] 發生時，則 [系統] 應 [回應]
 2. 如果 [先決條件] 成立，則 [系統] 應 [回應]
 
-## 非功能性需求
+## Non-Functional Requirements
 
-### 效能
+### Performance
 - [效能需求]
 
-### 安全性
+### Security
 - [安全性需求]
 
-### 可靠性
+### Reliability
 - [可靠性需求]
 
-### 可用性
+### Usability
 - [可用性需求]
+
+### Observability
+- [可觀測性需求（logs/metrics/traces）]
