@@ -26,4 +26,4 @@ Job=.NET 8.0  Runtime=.NET 8.0
 |------- |-----------:|----------:|----------:|-------:|----------:|
 | Default |  0.2392 ns | 0.0281 ns | 0.0402 ns |      - |         - |
 | LinqWithAggregate | 10.1143 ns | 0.2257 ns | 0.5186 ns | 0.0025 |      32 B |
-| LeftShitOperator |  0.1970 ns | 0.0251 ns | 0.0235 ns |      - |         - |
+| LeftShiftOperator |  0.1970 ns | 0.0251 ns | 0.0235 ns |      - |         - |
