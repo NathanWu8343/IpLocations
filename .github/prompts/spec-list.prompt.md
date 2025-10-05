@@ -29,19 +29,19 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
 
 3.  **輸出格式**
     ```
-    📋 Project Specs Overview
+    📋 專案規格總覽
 
-    1. user-authentication (Complete)
-       Phase: Implementation (7/8 tasks)
-       Last updated: 2025-01-15
+    1. 使用者認證（已完成）
+       階段：實作（7/8 項任務）
+       最後更新：2025-01-15
 
-    2. data-export (In Progress)
-       Phase: Design
-       Last updated: 2025-01-14
+    2. 資料匯出（進行中）
+       階段：設計
+       最後更新：2025-01-14
 
-    3. notification-system (Planning)
-       Phase: Requirements
-       Last updated: 2025-01-13
+    3. 通知系統（規劃中）
+       階段：需求
+       最後更新：2025-01-13
     ```
 
 4.  **其他動作**

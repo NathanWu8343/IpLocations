@@ -34,11 +34,11 @@ tools: ['editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'problems', 
 
 4.  **輸出格式：**
     ```
-    Spec: user-authentication
-    Phase: Implementation
-    Progress: Requirements ✅ | Design ✅ | Tasks ✅
-    Implementation: 3/8 tasks complete
-    Next: Execute task 4 - "Implement password validation"
+    規格：user-authentication
+    階段：實作
+    進度：需求 ✅ | 設計 ✅ | 任務 ✅
+    實作：3/8 個任務已完成
+    下一步：執行任務 4 -「實作密碼驗證」
     ```
 
 ## Workflow Phases
