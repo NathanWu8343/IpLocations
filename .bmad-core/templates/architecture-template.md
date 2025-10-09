@@ -30,6 +30,16 @@
 ## 系統依賴方向
 [使用 Mermaid 語法繪製高層次的元件的依賴關係，確保單向依賴並避免循環依賴]
 
+**範例：**
+```mermaid
+graph TD
+    UI[UI 層] --> BL[業務邏輯層]
+    BL --> DAL[資料存取層]
+    DAL --> DB[(資料庫)]
+    BL --> Cache[快取層]
+```
+
+**你的系統：**
 ```mermaid
 graph TD
     A[元件 A] --> B[元件 B]
@@ -37,23 +47,29 @@ graph TD
 ```
 
 ## 資料模型與流動
-[請以 Data Flow Diagram (DFD) 形式繪製核心資料實體、彼此關聯及主要資料流向。條列說明資料流動脈絡，並以 Mermaid 語法輔助圖示。]
+[以 Data Flow Diagram (DFD) 形式繪製核心資料實體、彼此關聯及主要資料流向]
 
-- **核心實體：** 例如：使用者 (User)、訂單 (Order)、產品 (Product)
-- **資料流動：** 例如：使用者下單 → 訂單服務處理 → 庫存服務更新 → 通知服務發送郵件
+- **核心實體：** [例如：使用者 (User)、訂單 (Order)、產品 (Product)]
+- **資料流動：** [例如：使用者下單 → 訂單服務處理 → 庫存服務更新 → 通知服務發送]
 
+**範例：**
+```mermaid
+flowchart LR
+    User[使用者] -->|建立| Order[訂單]
+    Order -->|查詢| Product[產品]
+    Order -->|更新| Inventory[庫存]
+    Order -->|觸發| Notify[通知]
+```
+
+**你的系統：**
 ```mermaid
 flowchart TD
     User[使用者]
     Order[訂單]
     Product[產品]
-    Inventory[庫存服務]
-    Notification[通知服務]
 
     User -->|下單| Order
-    Order -->|處理| Inventory
-    Inventory -->|更新庫存| Product
-    Order -->|通知| Notification
+    Order -->|處理| Product
 ```
 
 ## 錯誤處理與重試策略
@@ -85,7 +101,7 @@ flowchart TD
 - **安全性考量**：監控資料存取需經權限控管，避免敏感資訊外洩。
 
 ## 架構決策記錄 (ADR)
-[以條列或表格描述架構決策、理由與影響範圍]
+[記錄影響系統架構的重大決策，如：微服務 vs 單體、同步 vs 非同步、分層架構設計等]
 
 ### 決策記錄格式
 
