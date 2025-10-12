@@ -2,16 +2,12 @@
 
 ## 版本歷史
 
-[請依下表格式記錄每次重大版本的更新資訊，每次更新請新增一行，勿覆蓋原有紀錄]
-
-| 日期         | 版本號            | 描述          | 作者          |
-| ------------ | ----------------- | ------------- | ------------- |
-| [YYYY-MM-DD] | [版本號 (如 1.0)] | [5~10 字簡述] | [AI模型/姓名] |
+| 日期   | 版本號 | 描述       | 作者 |
+| ------ | ------ | ---------- | ---- |
+| [Date] | [1.0]  | [5~10 字簡述] | [AI] |
 
 ## 目錄組織
 [以樹狀結構呈現專案的目錄結構]
-
-**範例結構（根據專案類型選擇）：**
 
 ```
 # 應用程式專案
@@ -30,11 +26,6 @@ project-root/
 ├── examples/               # 使用範例
 ├── tests/                  # 測試
 └── docs/                   # 文件
-```
-
-**你的專案結構：**
-```
-[填寫你的目錄結構]
 ```
 
 ## 命名慣例
@@ -56,9 +47,6 @@ project-root/
 - **變數**: [例如：camelCase、snake_case、lowercase]
 - **介面**: [例如：IUserService、UserServiceInterface、user_service_protocol]
 - **命名空間/套件**: [例如：PascalCase、snake_case、kebab-case]
-
-**建議：遵循所選語言的主流慣例**
-- 例如：C# 使用 PascalCase，Python 使用 snake_case，JavaScript 使用 camelCase
 
 ## 匯入模式
 
@@ -108,45 +96,25 @@ project-root/
 - 隱藏實作細節
 
 ## 程式碼組織原則
-
-1. **單一職責**: [每個檔案應有單一明確目的]
-2. **模組化**: [程式碼應組織成可重用模組]
-3. **可測試性**: [建構易於測試的程式碼]
-4. **一致性**: [遵循程式碼庫中已建立的模式]
+`
+選擇適用於您專案的方式：
+- 每個檔案一個類別/模組
+- 相關功能分組在一起
+- 公開 API 置於頂部/底部
+- 隱藏實作細節
+`
 
 ## 測試結構模式
 
 [定義在測試檔案中組織測試程式碼的常見模式。以下為範例 - 請選擇適用於您專案的模式]
 
 ### 測試命名慣例
+[定義測試案例命名慣例。以下為範例 - 請選擇適用於您專案的模式]
 
-**常見格式（選擇一種）：**
-
-1. **行為導向格式：**
-   ```
-   MethodName_Should_ExpectedBehavior_When_Condition
-   ```
-   範例：
-   - `ConvertIp_Should_ReturnNegativeOne_When_IpIsInvalid`
-   - `GetUser_Should_ThrowException_When_UserNotFound`
-
-2. **句子格式：**
-   ```
-   method_name_should_expected_behavior_when_condition
-   ```
-   範例：
-   - `convert_ip_should_return_negative_one_when_ip_is_invalid`
-   - `get_user_should_throw_exception_when_user_not_found`
-
-3. **BDD 格式：**
-   ```
-   Given_Precondition_When_Action_Then_Outcome
-   ```
-   範例：
-   - `Given_InvalidIp_When_Convert_Then_ReturnsNegativeOne`
-   - `Given_UserNotFound_When_GetUser_Then_ThrowsException`
-
-**你的專案格式：** [填寫或選用上述格式]
+- 方法導向: `MethodName_Should_ExpectedBehavior_When_Condition`
+- 行為導向: `Should_ExpectedBehavior_When_Condition`
+- 句子形式: `method name should expected behavior when condition`
+- 情境描述: `Given_Precondition_When_Action_Then_Outcome`
 
 ### 測試檔案組織
 
@@ -201,35 +169,25 @@ public void IpToInt_Should_ReturnNegativeOne_When_IpIsInvalid()
 - 測試資料檔案: 儲存大量或複雜的測試資料
 
 ## 測試組織原則
-
-1. **單一職責**: [每個測試案例應專注於驗證單一行為或情境]
-2. **獨立性**: [測試案例之間應相互獨立，不依賴執行順序]
-3. **可重複性**: [測試結果應可重複且一致，不受外部狀態影響]
-4. **可維護性**: [測試程式碼應清晰易讀，易於維護與更新]
-5. **快速回饋**: [優先撰寫快速執行的測試，提供即時回饋]
-6. **完整覆蓋**: [涵蓋正常情境、邊界條件與錯誤處理]
+`
+選擇適用於您專案的方式：
+- 每個測試案例聚焦單一功能或情境
+- 測試須獨立且可重現
+- 覆蓋正常、邊界及異常情境
+- 測試命名清楚描述預期行為
+- 測試失敗時能快速定位問題
+`
 
 ## 程式碼大小指南
+`
+建議指南：
+- **檔案大小**: [定義每個檔案的最大行數]
+- **函式/方法大小**: [定義每個函式的最大行數]
+- **類別/模組複雜度**: [定義複雜度限制]
+- **巢狀深度**: [最大巢狀層級]
+`
 
-### 建議標準
-
-| 項目 | 建議值 | 說明 |
-|------|--------|------|
-| **檔案大小** | ≤ 300 行 | 超過建議拆分為多個檔案 |
-| **類別/模組方法數** | ≤ 10 個 | 超過建議拆分職責 |
-| **函式/方法行數** | ≤ 50 行 | 超過建議重構為多個小函式 |
-| **函式參數數量** | ≤ 5 個 | 超過建議使用物件封裝參數 |
-| **巢狀深度** | ≤ 3 層 | 超過建議提取子函式 |
-| **圈複雜度** | ≤ 10 | 超過建議簡化邏輯分支 |
-
-**注意：** 以上為通用建議，實際標準應依據專案特性與團隊共識調整。
-
-### 你的專案標準
-- **檔案大小**: [自訂標準]
-- **函式大小**: [自訂標準]
-- **其他**: [自訂標準]
-
-## 儀表板/監控結構 (*若功能涉及資料時納入*)
+## 儀表板/監控結構 (*如適用*)
 [儀表板或監控元件的組織方式]
 
 ### 範例結構：
