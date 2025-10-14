@@ -46,7 +46,7 @@ description: '建立新的功能規格，並嚴格遵循規格驅動的工作流
 
 ### 3. 生成需求文件
 
-- 依據 `requirements-template.md` 定義的執行流程與撰寫規範，生成需求文件
+- 依據 `requirements-template.md` 定義的「執行流程」與「撰寫規範」，生成需求文件
 - 完成後，一次性寫入 `.bmad-core/specs/{feature-name}/requirements.md`
 
 **[若無 [NEEDS CLARIFICATION] 標記]**
