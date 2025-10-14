@@ -33,23 +33,21 @@ description: '建立新的功能規格，並嚴格遵循規格驅動的工作流
 
 **檢查檔案**
 - 檢查 `.bmad-core/specs/{feature-name}/requirements.md` 是否已存在
-- 若 requirements.md 已存在，詢問是否覆寫
 
-若有問題，統一回報並終止
+若有問題，一次性列出所有錯誤。若 requirements.md 已存在，詢問「是否覆寫？」並等待確認後繼續。
 
 ### 2. 環境設置與資料載入
 
-建立 `.bmad-core/specs/{feature-name}/` 目錄 (若不存在)
+建立 `.bmad-core/specs/{feature-name}/` 目錄 （若不存在）
 
-**載入必要資料**
+**載入資料**
 - 讀取 `.bmad-core/steering/product.md`（提取產品目標、使用者需求）
 - 讀取 `.bmad-core/templates/requirements-template.md`（取得生成規則）
 
 ### 3. 生成需求文件
 
-依照 `requirements-template.md` 定義的「執行流程」嚴格執行與撰寫規範生成內容，完成後一次性寫入 `.bmad-core/specs/{feature-name}/requirements.md`
-
-✅ 需求文件已完成，於 `.bmad-core/specs/{feature-name}/requirements.md`
+- 依據 `requirements-template.md` 定義的執行流程與撰寫規範，生成需求文件
+- 完成後，一次性寫入 `.bmad-core/specs/{feature-name}/requirements.md`
 
 **[若無 [NEEDS CLARIFICATION] 標記]**
 ```
@@ -65,7 +63,7 @@ description: '建立新的功能規格，並嚴格遵循規格驅動的工作流
 
 **[若有 [NEEDS CLARIFICATION] 標記]**
 ```
-⚠️ 文件已生成，但以下資訊需要補充：
+⚠️ 需求文件已生成，但以下資訊需要補充：
 
 1. [具體問題 1]（位於：[章節名稱]）
    💡 建議：[基於分析的推測與建議]
@@ -76,7 +74,7 @@ description: '建立新的功能規格，並嚴格遵循規格驅動的工作流
 請提供補充資訊，或確認建議方向是否可行。
 ```
 
-### 步驟 5：互動循環
+### 4. 互動循環
 
 **處理使用者反饋：**
 
