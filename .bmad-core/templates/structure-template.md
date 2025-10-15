@@ -194,7 +194,7 @@ public void IpToInt_Should_ReturnNegativeOne_When_IpIsInvalid（）
 - **巢狀深度**： [最大巢狀層級]
 `
 
-## 儀表板/監控結構 （*如適用*）
+## 儀表板/監控結構
 [儀表板或監控元件的組織方式]
 
 ### 範例結構：
