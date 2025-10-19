@@ -1,12 +1,12 @@
 ---
 mode: agent
 tools: ['edit/createFile', 'edit/createDirectory', 'edit/editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'think', 'todos']
-description: '建立新的功能規格，並嚴格遵循規格驅動的工作流程。'
+description: '建立新的功能規格 (SPEC)'
 ---
 
-# Spec Create Command
+# Specification Create Command
 
-建立新的功能規格，並嚴格遵循規格驅動的工作流程。
+建立新的功能規格 (SPEC)
 
 ## Usage
 ```
@@ -15,7 +15,8 @@ description: '建立新的功能規格，並嚴格遵循規格驅動的工作流
 
 ## Instructions
 
-你是一位產品經理，負責將功能構想轉化為清晰、可執行的需求規格。
+你是一位技術產品經理，專精於將高層次的產品目標與使用者需求，轉化為具體、無歧義且可執行的功能規格 (SPEC)。
+
 
 ## Processing Flow
 
@@ -28,47 +29,47 @@ description: '建立新的功能規格，並嚴格遵循規格驅動的工作流
 - 禁止空格與特殊字元
 
 **檢查必要文件**
-- `.bmad-core/templates/requirements-template.md`
+- `.bmad-core/templates/spec-template.md`
 - `.bmad-core/steering/product.md`
 
 **檢查檔案**
-- 檢查 `.bmad-core/specs/{feature-name}/requirements.md` 是否已存在
+- 檢查 `.bmad-core/changes/{feature-name}/spec.md` 是否已存在
 
-若有問題，一次性列出所有錯誤。若 requirements.md 已存在，詢問「是否覆寫？」並等待確認後繼續。
+若有問題，一次性列出所有錯誤。若 spec.md 已存在，詢問「是否覆寫？」並等待確認後繼續。
 
 ### 2. 環境設置與資料載入
 
-建立 `.bmad-core/specs/{feature-name}/` 目錄 （若不存在）
+建立 `.bmad-core/changes/{feature-name}/` 目錄 （若不存在）
 
 **載入資料**
 - 讀取 `.bmad-core/steering/product.md`（提取產品目標、使用者需求）
-- 讀取 `.bmad-core/templates/requirements-template.md`（取得生成規則）
+- 讀取 `.bmad-core/templates/spec-template.md`（取得生成規則）
 
 ### 3. 生成需求文件
 
-- 依據 `requirements-template.md` 定義的「執行流程」與「撰寫規範」，生成需求文件
-- 完成後，一次性寫入 `.bmad-core/specs/{feature-name}/requirements.md`
+- 依據 `spec-template.md` 定義的「## Guidelines」與「## Process Flow」，生成 SPEC 文件
+- 完成後，一次性寫入 `.bmad-core/changes/{feature-name}/spec.md`
 
 **[若無 [NEEDS CLARIFICATION] 標記]**
 ```
-✨ 需求文件生成完成！
+✨ SPEC 文件生成完成！
 
 📋 摘要：
 - 功能範圍：[簡述核心功能]
 - 需求數量：[X 個主要需求]
-- 成功標準：[Y 個可衡量指標]
+- 驗收標準：[Y 個驗收標準]
 
 請確認內容是否符合專案規範。確認後將進入設計階段。
 ```
 
 **[若有 [NEEDS CLARIFICATION] 標記]**
 ```
-⚠️ 需求文件已生成，但以下資訊需要補充：
+⚠️ SPEC 文件已生成，但以下資訊需要補充：
 
-1. [具體問題 1]（位於：[章節名稱]）
+1. [具體問題 1]（章節：[章節名稱]）
    💡 建議：[基於分析的推測與建議]
 
-2. [具體問題 2]（位於：[章節名稱]）
+2. [具體問題 2]（章節：[章節名稱]）
    💡 建議：[基於分析的推測與建議]
 
 請提供補充資訊，或確認建議方向是否可行。
@@ -83,17 +84,20 @@ description: '建立新的功能規格，並嚴格遵循規格驅動的工作流
   b. **若補充了待澄清資訊，必須：**
     - 移除對應的 `[NEEDS CLARIFICATION]` 標記
     - 更新「待補充資訊」章節：
-      * 若所有問題已解決 → 刪除整個「待補充資訊」章節
+      * 若所有問題已解決 → 刪除整個「## 待補充資訊」章節
       * 若仍有未解決問題 → 僅移除已解決項目
-  c. 修改完成後，再次呈現摘要並請使用者確認
-  d. 重複此流程直至獲得最終確認
+  c. **若回應「跳過」：**
+    - **指定項目**（如「1. 跳過」）→ 僅移除該項標記及對應條目
+    - **未指定項目**（僅回應「跳過」）→ 移除所有標記並刪除整個「## 待補充資訊」章節
+  d. 修改完成後，再次呈現摘要並請使用者確認
+  e. 重複此流程直至獲得最終確認
 
 ## Output
 
-`.bmad-core/specs/{feature-name}/requirements.md`
+`.bmad-core/changes/{feature-name}/sepc.md`
 
 ## Example
 
 ```bash
-/spec-create user-authentication "允許使用者安全地註冊和登入"
+/spec-create user-authentication
 ```
