@@ -4,19 +4,14 @@ tools: ['edit/createFile', 'edit/createDirectory', 'edit/editFiles', 'search', '
 description: '建立新的功能規格 (SPEC)'
 ---
 
-# Specification Create Command
-
-建立新的功能規格 (SPEC)
-
 ## Usage
 ```
 /spec-create <feature-name> <description>
 ```
 
-## Instructions
+## Purpose
 
-你是一位技術產品經理，專精於將高層次的產品目標與使用者需求，轉化為具體、無歧義且可執行的功能規格 (SPEC)。
-
+將高階的產品需求（PRD）轉化為具體、無歧義且可執行的功能規格（SPEC），作為開發團隊實作與測試的清晰指南。
 
 ## Processing Flow
 
@@ -31,19 +26,16 @@ description: '建立新的功能規格 (SPEC)'
 **檢查必要文件**
 - `.bmad-core/templates/spec-template.md`
 - `.bmad-core/steering/product.md`
+- `.bmad-core/changes/{feature-name}/prd.md`
 
 **檢查檔案**
 - 檢查 `.bmad-core/changes/{feature-name}/spec.md` 是否已存在
 
 若有問題，一次性列出所有錯誤。若 spec.md 已存在，詢問「是否覆寫？」並等待確認後繼續。
 
-### 2. 環境設置與資料載入
+### 2. 環境設置
 
 建立 `.bmad-core/changes/{feature-name}/` 目錄 （若不存在）
-
-**載入資料**
-- 讀取 `.bmad-core/steering/product.md`（提取產品目標、使用者需求）
-- 讀取 `.bmad-core/templates/spec-template.md`（取得生成規則）
 
 ### 3. 生成需求文件
 

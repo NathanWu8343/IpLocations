@@ -4,18 +4,14 @@ tools: ['edit/createFile', 'edit/createDirectory', 'edit/editFiles', 'search', '
 description: '建立新的產品需求文件 (PRD)'
 ---
 
-# Product Requirement Document Create Command
-
-建立新的產品需求文件 (PRD)
-
 ## Usage
 ```
 /prd-create <feature-name> <description>
 ```
 
-## Instructions
+## Purpose
 
-你是一位產品經理，負責將需求構想轉化為明確且可執行的產品需求文件。
+將功能構想轉化為結構化的產品需求文件 (PRD)，明確定義使用者需求、驗收標準與成功指標。
 
 ## Processing Flow
 
@@ -36,17 +32,13 @@ description: '建立新的產品需求文件 (PRD)'
 
 若有問題，一次性列出所有錯誤。若 prd.md 已存在，詢問「是否覆寫？」並等待確認後繼續。
 
-### 2. 環境設置與資料載入
+### 2. 環境設置
 
 建立 `.bmad-core/changes/{feature-name}/` 目錄 （若不存在）
 
-**載入資料**
-- 讀取 `.bmad-core/steering/product.md`（提取產品目標）
-- 讀取 `.bmad-core/templates/prd-template.md`（取得生成規則）
-
 ### 3. 生成文件
 
-- 依據 `prd-template.md` 定義的「## Guidelines」與「## Process Flow」，生成需求文件
+- 依據 `prd-template.md` 定義的「## Guidelines」與「## Process Flow」，生成 PRD 文件
 - 完成後，一次性寫入 `.bmad-core/changes/{feature-name}/prd.md`
 
 **[若無 [NEEDS CLARIFICATION] 標記]**

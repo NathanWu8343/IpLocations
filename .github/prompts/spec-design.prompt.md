@@ -13,6 +13,7 @@ tools: ['edit', 'search', 'runCommands', 'runTasks', 'usages', 'think', 'changes
 ```
 
 ## Instructions
+
 您正在處理規格工作流程的 **設計階段**，請嚴格依照流程完成。
 
 ## Processing Flow
