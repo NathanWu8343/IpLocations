@@ -4,7 +4,9 @@
 ## 待補充資訊
 
 - [問題 1]（章節：[章節名稱]）
+   - 建議：[選項 A / 選項 B / 選項 C]
 - [問題 2]（章節：[章節名稱]）
+   - 建議：[選項 A / 選項 B]
 
 ## 版本歷史
 
@@ -12,7 +14,8 @@
 | ---------- | ---- | -------- | ---- |
 | 2025-10-13 | 1.0  | 初始建立 | AI   |
 
-## 目錄組織
+## Directory Organization
+
 [以樹狀結構呈現專案的目錄結構]
 
 ```
@@ -34,7 +37,8 @@ project-root/
 └── docs/                   # 文件
 ```
 
-## 命名慣例
+## Naming Conventions
+
 [定義專案中使用的命名慣例。以下為範例 - 請選擇適用於您專案的模式]
 
 ### 目錄
@@ -55,7 +59,7 @@ project-root/
 - **介面**： [例如：IUserService、UserServiceInterface、user_service_protocol]
 - **命名空間/套件**： [例如：PascalCase、snake_case、kebab-case]
 
-## 匯入模式
+## Import Patterns
 
 ### 匯入順序
 [定義您的專案的匯入順序慣例。以下為範例 - 請選擇適用於您專案的模式]
@@ -74,7 +78,7 @@ project-root/
 - 套件/命名空間組織
 - 依賴管理方法
 `
-## 程式碼結構模式
+## Code Structure Patterns
 
 [定義在檔案中組織程式碼的常見模式。以下為範例 - 請選擇適用於您專案的模式]
 
@@ -111,7 +115,7 @@ project-root/
 - 隱藏實作細節
 `
 
-## 測試結構模式
+## Test Structure Patterns
 
 [定義在測試檔案中組織測試程式碼的常見模式。以下為範例 - 請選擇適用於您專案的模式]
 
@@ -185,7 +189,7 @@ public void IpToInt_Should_ReturnNegativeOne_When_IpIsInvalid（）
 - 測試失敗時能快速定位問題
 `
 
-## 程式碼大小指南
+## Code Size Guidelines
 `
 建議指南：
 - **檔案大小**： [定義每個檔案的最大行數]
@@ -194,7 +198,7 @@ public void IpToInt_Should_ReturnNegativeOne_When_IpIsInvalid（）
 - **巢狀深度**： [最大巢狀層級]
 `
 
-## 儀表板/監控結構
+## Dashboard/Monitoring Structure
 [儀表板或監控元件的組織方式]
 
 ### 範例結構：
@@ -214,7 +218,7 @@ src/
 - 對主應用程式的依賴最小化
 - 可在不影響核心功能的情況下停用
 
-## 文件與註解
+## Documentation Standards
 
 - 所有公開 API 皆須有文件
 - 複雜邏輯應包含行內註解

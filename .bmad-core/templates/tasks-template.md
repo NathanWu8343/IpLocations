@@ -1,130 +1,312 @@
-# 實施計畫
+# Tasks Plan Template
 
-## 任務總覽
-[實施方法的簡要描述]
+## Guidelines
 
-## 指導文件合規性
-[任務如何遵循 structure.md 慣例和 tech.md 模式和 architecture.md 架構]
+本模板用於將功能規格與技術設計轉換為可執行的任務計畫。
 
-## 任務
+**核心要求**：
+- 基於 `spec.md` 與 `design.md` 結果進行任務拆解
+- 遵循 `architecture.md` 標準，確保設計符合整體架構模式
+- 遵循 `tech.md` 標準，確保設計符合文件化的技術指南
+- 尊重 `structure.md` 慣例，根據專案結構組織元件
 
-- [ ] 1. 在 src/types/feature.ts 中建立核心介面
-  - 檔案: src/types/feature.ts
-  - 為功能資料結構定義 TypeScript 介面
-  - 擴充 base.ts 中的現有基礎介面
-  - 目的: 為功能實施建立類型安全性
-  - _利用: src/types/base.ts_
-  - _需求: 1.1_
+**關鍵原則**：
+- 任務**必須**依 User Story 組織，以實現獨立的實作和測試
+- 每個 User Story 完成後可獨立驗證和部署
+- 測試為可選：僅在 `spec.md` 中明確要求或使用者要求 TDD 方法時才產生測試任務
 
-- [ ] 2. 在 src/models/FeatureModel.ts 中建立基礎模型類別
-  - 檔案: src/models/FeatureModel.ts
-  - 實施擴充 BaseModel 類別的基礎模型
-  - 使用現有驗證工具新增驗證方法
-  - 目的: 為功能提供資料層基礎
-  - _利用: src/models/BaseModel.ts, src/utils/validation.ts_
-  - _需求: 2.1_
 
-- [ ] 3. 將特定模型方法新增至 FeatureModel.ts
-  - 檔案: src/models/FeatureModel.ts (從任務 2 繼續)
-  - 實施建立、更新、刪除方法
-  - 新增外鍵的關聯處理
-  - 目的: 完成 CRUD 操作的模型功能
-  - _利用: src/models/BaseModel.ts_
-  - _需求: 2.2, 2.3_
+### Phase Structure（階段結構）
 
-- [ ] 4. 在 tests/models/FeatureModel.test.ts 中建立模型單元測試
-  - 檔案: tests/models/FeatureModel.test.ts
-  - 為模型驗證和 CRUD 方法撰寫測試
-  - 使用現有的測試工具和測試資料
-  - 目的: 確保模型可靠性並捕捉回歸
-  - _利用: tests/helpers/testUtils.ts, tests/fixtures/data.ts_
-  - _需求: 2.1, 2.2_
+生成的任務計畫必須遵循以下階段架構：
 
-- [ ] 5. 在 src/services/IFeatureService.ts 中建立服務介面
-  - 檔案: src/services/IFeatureService.ts
-  - 使用方法簽章定義服務合約
-  - 擴充基礎服務介面模式
-  - 目的: 為依賴注入建立服務層合約
-  - _利用: src/services/IBaseService.ts_
-  - _需求: 3.1_
+**Phase 1: Setup（設定）**
+- 目的：專案初始化
+- 特性：無阻塞性，可立即開始
+- 內容：專案結構、相依性安裝、工具設定
 
-- [ ] 6. 在 src/services/FeatureService.ts 中實施功能服務
-  - 檔案: src/services/FeatureService.ts
-  - 使用 FeatureModel 建立具體的服務實施
-  - 使用現有的錯誤工具新增錯誤處理
-  - 目的: 為功能操作提供業務邏輯層
-  - _利用: src/services/BaseService.ts, src/utils/errorHandler.ts, src/models/FeatureModel.ts_
-  - _需求: 3.2_
+**Phase 2: Foundational（基礎）⚠️**
+- 目的：阻擋性先決條件
+- 特性：**必須**在任何 User Story 前完成
+- 內容：所有 User Story 共用的基礎設施（資料庫、認證、路由框架、錯誤處理等）
 
-- [ ] 7. 在 src/utils/di.ts 中新增服務依賴注入
-  - 檔案: src/utils/di.ts (修改現有)
-  - 在依賴注入容器中註冊 FeatureService
-  - 設定服務生命週期和依賴
-  - 目的: 在整個應用程式中啟用服務注入
-  - _利用: src/utils/di.ts 中的現有 DI 設定_
-  - _需求: 3.1_
+**Phase 3+: User Stories（使用者故事）**
+- 目的：依優先順序實作功能
+- 特性：全部相依 Foundational，彼此間可並行
+- 結構：每個 User Story（P1、P2、P3...）擁有獨立的 Phase
+- User Story 內部順序：測試 (若有要求) → 模型 → 服務 → 端點 → 整合
+- 檢查點：每個 Phase 完成後，該 User Story 應可獨立測試
 
-- [ ] 8. 在 tests/services/FeatureService.test.ts 中建立服務單元測試
-  - 檔案: tests/services/FeatureService.test.ts
-  - 為帶有模擬依賴的服務方法撰寫測試
-  - 測試錯誤處理情境
-  - 目的: 確保服務可靠性和適當的錯誤處理
-  - _利用: tests/helpers/testUtils.ts, tests/mocks/modelMocks.ts_
-  - _需求: 3.2, 3.3_
+**Phase N: Polish（精煉）**
+- 目的：橫切面關注點
+- 特性：相依所有 User Story 完成
+- 內容：文件更新、程式碼清理、效能最佳化、安全性強化
 
-- [ ] 4. 建立 API 端點
-  - 設計 API 結構
-  - _利用: src/api/baseApi.ts, src/utils/apiUtils.ts_
-  - _需求: 4.0_
 
-- [ ] 4.1 設定路由和中介軟體
-  - 設定應用程式路由
-  - 新增驗證中介軟體
-  - 設定錯誤處理中介軟體
-  - _利用: src/middleware/auth.ts, src/middleware/errorHandler.ts_
-  - _需求: 4.1_
+### Task Organization（任務組織邏輯）
 
-- [ ] 4.2 實施 CRUD 端點
-  - 建立 API 端點
-  - 新增請求驗證
-  - 撰寫 API 整合測試
-  - _利用: src/controllers/BaseController.ts, src/utils/validation.ts_
-  - _需求: 4.2, 4.3_
+將輸入文件的元件映射到 Phase 結構，遵循以下規則：
 
-- [ ] 5. 新增前端元件
-  - 規劃元件架構
-  - _利用: src/components/BaseComponent.tsx, src/styles/theme.ts_
-  - _需求: 5.0_
+1. **識別 User Stories（從 spec.md）**
+   - 提取所有 User Stories 及其優先順序（P1、P2、P3...）
+   - 為每個 User Story 建立獨立的 Phase（Phase 3+）
+   - P1 User Story 標註為 MVP
 
-- [ ] 5.1 建立基礎 UI 元件
-  - 設定元件結構
-  - 實施可重用元件
-  - 新增樣式和主題
-  - _利用: src/components/BaseComponent.tsx, src/styles/theme.ts_
-  - _需求: 5.1_
+2. **分配資料模型（從 design.md）**
+   - 單一 User Story 使用的模型 → 歸入該 User Story 的 Phase
+   - 多個 User Story 共用的模型 → 歸入最早的 User Story 或 Foundational Phase
+   - 模型關聯 → 在適當的 User Story Phase 中的服務層任務
 
-- [ ] 5.2 實施特定功能元件
-  - 建立功能元件
-  - 新增狀態管理
-  - 連接到 API 端點
-  - _利用: src/hooks/useApi.ts, src/components/BaseComponent.tsx_
-  - _需求: 5.2, 5.3_
+3. **分配服務邏輯（從 design.md）**
+   - 每個服務 → 對應至使用該服務的 User Story Phase
+   - 服務間的相依性 → 確保在同一 User Story 或更早的 Phase
 
-- [ ] 6. 整合與測試
-  - 規劃整合方法
-  - _利用: src/utils/integrationUtils.ts, tests/helpers/testUtils.ts_
-  - _需求: 6.0_
+4. **分配 API 端點（從 design.md 或 contracts/）**
+   - 每個 endpoint/contract → 對應至其服務的 User Story Phase
+   - 若有要求測試：Contract 測試任務 → 在實作任務之前
 
-- [ ] 6.1 撰寫端對端測試
-  - 設定 E2E 測試框架
-  - 撰寫使用者旅程測試
-  - 新增測試自動化
-  - _利用: tests/helpers/testUtils.ts, tests/fixtures/data.ts_
-  - _需求: 全部_
+5. **分配基礎設施（從 design.md）**
+   - 共享基礎設施 → Setup Phase（Phase 1）
+   - 阻擋性基礎任務 → Foundational Phase（Phase 2）
+   - User Story 特定的設定 → 在該 User Story 的 Phase 內
 
-- [ ] 6.2 最終整合與清理
-  - 整合所有元件
-  - 修復任何整合問題
-  - 清理程式碼和文件
-  - _利用: src/utils/cleanup.ts, docs/templates/_
-  - _需求: 全部_
+6. **處理測試任務（若需要）**
+   - 檢查 `spec.md` 是否明確要求測試
+   - 若需要，在每個 User Story 的實作任務前加入：
+     - 合約測試（Contract Tests）
+     - 整合測試（Integration Tests）
+   - 測試任務必須在對應的實作任務之前
+
+### Task Format（任務格式）
+
+任務採用以下格式：
+
+```
+[TaskID] [Story] [描述]
+```
+
+**欄位定義**：
+
+- **[TaskID]**：執行順序中的序號（T001、T002、T003...），全局唯一且遞增
+
+- **[Story]**：格式為 `[US-001]`、`[US-002]`、`[US-003]`，對應至 `spec.md` 的 User Story 編號
+  - **僅在 User Story Phase（Phase 3+）中使用**
+  - Setup、Foundational、Polish Phase 不使用 Story 標籤
+
+- **[描述]**：必須包含清晰的動作 + 確切的檔案路徑
+  - 範例：`在 src/models/user.py 中建立 User 模型`
+
+## Process Flow
+
+### 1. 載入指導文件與需求來源
+
+**依序讀取以下文件**：
+
+**(1-3) 專案層級標準**
+- `doc/steering/architecture.md` → 整體架構模式、設計原則
+- `doc/steering/tech.md` → 技術模式、標準與最佳實踐
+- `doc/steering/structure.md` → 檔案組織慣例、命名規範
+
+**(4-5) 功能層級來源**
+- `doc/changes/{feature-name}/spec.md` → User Story、成功指標、功能需求
+- `doc/changes/{feature-name}/design.md` → 設計決策、元件結構、技術選型
+  - ⚠️ 必須載入完整內容，不可遺漏任何設計細節
+
+**(可選) 合約規範**
+- `doc/changes/{feature-name}/contracts/` → OpenAPI/GraphQL 結構描述（若存在）
+
+### 2. 生成文件草稿
+
+**規劃填寫策略**：
+- 依照下方 Template 結構逐步完整填寫每個章節
+- 根據實際的 spec.md 和 design.md 內容調整階段數量
+- 確保每個 User Story 都有對應的階段
+
+**重要提醒**：
+- Template 中的範例任務僅供說明格式之用
+- **請勿保留這些範例任務**，必須根據實際需求重新撰寫
+- 任務描述必須包含具體的檔案路徑和實作細節
+
+### 3. 草稿反思與精煉
+
+**審視任務計畫品質：**
+從執行者視角重新審視整份內容，檢查並修正：
+a. 階段邏輯性 - Setup → Foundational → User Stories 相依關係清晰，Foundational 包含所有阻塞性任務
+b. 任務完整性 - 每個 User Story 包含完整任務鏈（模型 → 服務 → 端點），spec.md 所有 Stories 都有對應階段
+c. 可執行性 - 任務描述包含具體檔案路徑與明確動作，[Story] 標籤正確標註，每個 Story 檢查點可獨立驗證
+
+## Template
+
+以下為最終需求文件的 Markdown 範本：
+
+```markdown
+# Implementation Plan
+
+## Phase 1: Setup (共享基礎設施)
+
+**目的**: 專案初始化和基本結構
+
+- [ ] T001 根據實作計畫建立專案結構
+- [ ] T002 使用 [framework] 相依性初始化 [language] 專案
+- [ ] T003 設定 linting 和格式化工具
+
+---
+
+## Phase 2: Foundational (阻塞性先決條件)
+
+**目的**: 必須在任何 User Story 可以實作之前完成的核心基礎設施
+
+**⚠️ 關鍵**: 在此階段完成之前，任何 User Story 的工作都不能開始
+
+基礎任務範例 (根據您的專案進行調整):
+
+- [ ] T004 設定資料庫結構描述和遷移框架
+- [ ] T005 實作驗證/授權框架
+- [ ] T006 設定 API 路由和中介軟體結構
+- [ ] T007 建立所有 Story 都相依的基礎模型/實體
+- [ ] T008 設定錯誤處理和日誌記錄基礎設施
+- [ ] T009 設定環境組態管理
+
+**檢查點**: 基礎已就緒 -  User Story 實作現在可以並行開始
+
+---
+
+## Phase 3: US-001 - [標題] (優先順序: P1) 🎯 MVP
+
+**目標**: [此 User Story 交付內容的簡要說明]
+
+**獨立測試**: [如何自行驗證此 Story 是否正常運作]
+
+### US-001 的測試 (可選 - 僅當要求測試時) ⚠️
+
+**注意：請先撰寫這些測試，確保它們在實作前會失敗**
+
+- [ ] T010 [US-001] 在 tests/contract/test_[name].py 中為 [endpoint] 進行合約測試
+- [ ] T011 [US-001] 在 tests/integration/test_[name].py 中為 [user journey] 進行整合測試
+
+### User Story 1 的實作
+
+- [ ] T012 [US-001] 在 src/models/[entity1].py 中建立 [Entity1] 模型
+- [ ] T013 [US-001] 在 src/models/[entity2].py 中建立 [Entity2] 模型
+- [ ] T014 [US-001] 在 src/services/[service].py 中實作 [Service] (相依於 T012、T013)
+- [ ] T015 [US-001] 在 src/[location]/[file].py 中實作 [endpoint/feature]
+- [ ] T016 [US-001] 新增驗證和錯誤處理
+- [ ] T017 [US-001] 為 US-001 的操作新增日誌記錄
+
+**檢查點**: 此時，US-001 應完全正常運作並可獨立測試
+
+---
+
+## Phase 4: US-002 - [標題] (優先順序: P2)
+
+**目標**: [此 Story 交付內容的簡要說明]
+
+**獨立測試**: [如何自行驗證此 Story 是否正常運作]
+
+### US-002 的測試 (可選 - 僅當要求測試時) ⚠️
+
+- [ ] T018 [US-002] 在 tests/contract/test_[name].py 中為 [endpoint] 進行合約測試
+- [ ] T019 [US-002] 在 tests/integration/test_[name].py 中為 [user journey] 進行整合測試
+
+### US-002 的實作
+
+- [ ] T020 [US-002] 在 src/models/[entity].py 中建立 [Entity] 模型
+- [ ] T021 [US-002] 在 src/services/[service].py 中實作 [Service]
+- [ ] T022 [US-002] 在 src/[location]/[file].py 中實作 [endpoint/feature]
+- [ ] T023 [US-002] 與 US-001 的元件整合 (如果需要)
+
+**檢查點**: 此時，US-001 和 US-002 都應能獨立運作
+
+---
+
+## Phase 5: US-003 - [標題] (優先順序: P3)
+
+**目標**: [此 Story 交付內容的簡要說明]
+
+**獨立測試**: [如何自行驗證此 Story 是否正常運作]
+
+### US-003  的測試 (可選 - 僅當要求測試時) ⚠️
+
+- [ ] T024 [US-003 ] 在 tests/contract/test_[name].py 中為 [endpoint] 進行合約測試
+- [ ] T025 [US-003 ] 在 tests/integration/test_[name].py 中為 [user journey] 進行整合測試
+
+### US-003 的實作
+
+- [ ] T026 [US-003 ] 在 src/models/[entity].py 中建立 [Entity] 模型
+- [ ] T027 [US-003 ] 在 src/services/[service].py 中實作 [Service]
+- [ ] T028 [US-003 ] 在 src/[location]/[file].py 中實作 [endpoint/feature]
+
+**檢查點**: 所有 User Story 現在都應能獨立運作
+
+---
+
+[視需要新增更多 User Story 階段，遵循相同的模式]
+
+---
+
+## Phase N: Polish & Cross-Cutting Concerns
+
+**目的**: 影響多個 User Story 的改進
+
+- [ ] TXXX docs/ 中的文件更新
+- [ ] TXXX 程式碼清理和重構
+- [ ] TXXX 所有 Story 的效能最佳化
+- [ ] TXXX tests/unit/ 中的額外單元測試 (如果要求)
+- [ ] TXXX 安全性強化
+
+---
+
+## Dependencies & Execution Order
+
+### Phase Dependencies
+
+- **Setup (Phase 1)**: 無相依性 - 可立即開始
+- **Foundational (Phase 2)**: 相依於 Setup 完成 - **阻塞**所有 User Story
+- **User Stories (Phase 3+)**: 全部相依於 Foundational 階段完成
+  - User Story 接著可以並行進行 (如果人力充足)
+  - 或按優先順序循序進行 (P1 → P2 → P3)
+- **Polish (Final Phase)**: 相依於所有期望的 User Story 都已完成
+
+### User Story Dependencies
+
+- **US-001 (P1)**: 可在 Foundational (Phase 2) 之後開始 - 不相依於其他 Story
+- **US-002 (P2)**: 可在 Foundational (Phase 2) 之後開始 - 可能與 US-001  整合，但應可獨立測試
+- **US-003 (P3)**: 可在 Foundational (Phase 2) 之後開始 - 可能與 US-001 / US-002 整合，但應可獨立測試
+
+### Within Each User Story
+
+- 測試 (如果包含) **必須**在實作前撰寫並**失敗**
+- 模型先於服務
+- 服務先於端點
+- 核心實作先於整合
+- User Story 完成後再移至下一個優先順序
+## Implementation Strategy
+
+### MVP First (僅限 User Story 1)
+
+1. 完成 Phase 1: Setup
+2. 完成 Phase 2: Foundational (**關鍵** - 阻塞所有 User Story)
+3. 完成 Phase 3: User Story 1
+4. **停止並驗證**: 獨立測試 User Story 1
+5. 如果準備就緒，則部署/展示
+
+### Incremental Delivery
+
+1. 完成 Setup + Foundational → 基礎就緒
+2. 新增 User Story 1 → 獨立測試 → 部署/展示 (MVP!)
+3. 新增 User Story 2 → 獨立測試 → 部署/展示
+4. 新增 User Story 3 → 獨立測試 → 部署/展示
+5. 每個 Story 都增加價值，而不會破壞先前的美好
+
+---
+
+## Notes
+
+- [Story] 標籤將任務對應到特定的 User Story 以實現可追蹤性
+- 每個 User Story 都應能獨立完成和測試
+- 在實作前驗證測試是否失敗
+- 在每個任務或邏輯群組後提交
+- 在任何檢查點停止以獨立驗證 Story
+- 避免：模糊的任務、相同的檔案衝突、破壞獨立性的跨 Story 相依性
+---
+```
