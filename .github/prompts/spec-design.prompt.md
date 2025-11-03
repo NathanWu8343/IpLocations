@@ -36,11 +36,12 @@ description: '將已批准的需求文件轉換為完整的技術設計藍圖，
 
 ### 2. 生成設計文件
 
-- 依據 `design-template.md` 定義的「## Guidelines」與「## Process Flow」，生成 SPEC 文件
+- 依據 `design-template.md` 定義的「## Guidelines」與「## Process Flow」，生成設計相關產出
 - 完成後，一次性寫入以下文件：
   * `doc/changes/{feature-name}/research.md`
   * `doc/changes/{feature-name}/design.md`
-  * `doc/changes/{feature-name}/contracts/` (若有 API 設計)
+  * `doc/changes/{feature-name}/contracts/` (若功能涉及 API 設計)
+   
    
 **呈現結果：**
 ```
@@ -60,7 +61,7 @@ description: '將已批准的需求文件轉換為完整的技術設計藍圖，
 **處理使用者反饋：**
 
 若使用者提出修改意見：
-  a. 在本步驟內直接修改設計文件內容
+  a. 直接修改已生成的設計文件內容
   b. 修改完成後，再次呈現摘要並請使用者確認
   c. 重複此流程直至獲得最終確認
 

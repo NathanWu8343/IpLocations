@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test:*)",
+      "Bash(tree:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(mkdir:*)",
+      "Bash(powershell:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "WebSearch",
+      "Read(//d/**)",
+      "Bash(cd /d D:repoIpLocations)",
+      "Bash(ls -la \"D:\\repo\\IpLocations\\src\\IpLocations.Api\\Models\"\" 2>/dev/null || echo \"Models 目錄為空或不存在 \")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

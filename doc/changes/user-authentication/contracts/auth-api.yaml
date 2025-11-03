@@ -1,0 +1,507 @@
+openapi: 3.0.3
+info:
+  title: IpLocations.Api - User Authentication
+  description: |
+    使用者身分驗證 API 規格文件
+    
+    **功能範疇**：
+    - 使用者註冊
+    - 使用者登入與登出
+    - 會話管理
+    - 個人資料查詢
+    
+    **安全性**：
+    - 密碼使用 bcrypt 加密儲存
+    - 會話使用 JWT Token（儲存於 HTTP-Only Cookie）
+    - 暴力破解防護（連續 3 次失敗鎖定 30 分鐘）
+    
+    **版本歷史**：
+    - 1.0（2025-11-03）：初始版本
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: https://localhost:8081/api
+    description: 本地開發環境（HTTPS）
+  - url: http://localhost:8080/api
+    description: 本地開發環境（HTTP）
+  - url: https://api.iplocations.example.com/api
+    description: 生產環境
+
+tags:
+  - name: Authentication
+    description: 身分驗證相關端點（註冊、登入、登出、個人資料）
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: 使用者註冊
+      description: |
+        建立新的使用者帳號。
+        
+        **功能需求對應**：FR-001 ~ FR-011
+        
+        **驗證規則**：
+        - 電子郵件不可為空白（FR-002）
+        - 密碼不可為空白（FR-003）
+        - 電子郵件格式必須包含 @ 符號與網域名稱（FR-004）
+        - 密碼至少 8 字元（FR-005）
+        - 密碼必須包含大寫字母、小寫字母、數字與特殊符號（FR-006）
+        - 電子郵件不可重複（FR-008、FR-009）
+        
+        **安全性**：
+        - 密碼使用 bcrypt 加密儲存，禁止明文（FR-007）
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              validRequest:
+                summary: 有效的註冊請求
+                value:
+                  email: user@example.com
+                  password: SecurePass123!
+              emptyFields:
+                summary: 欄位為空白
+                value:
+                  email: ""
+                  password: ""
+              invalidEmail:
+                summary: 電子郵件格式錯誤
+                value:
+                  email: invalid-email
+                  password: SecurePass123!
+              weakPassword:
+                summary: 密碼強度不足
+                value:
+                  email: user@example.com
+                  password: weak
+      responses:
+        '201':
+          description: 註冊成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+              example:
+                userId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                email: user@example.com
+                createdAt: "2025-11-03T10:30:00Z"
+                message: 註冊成功
+        '400':
+          description: 輸入驗證失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                emptyEmail:
+                  summary: 電子郵件為空白
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: 電子郵件為必填欄位
+                emptyPassword:
+                  summary: 密碼為空白
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: 密碼為必填欄位
+                invalidEmailFormat:
+                  summary: 電子郵件格式錯誤
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: 請輸入有效的電子郵件格式
+                passwordTooShort:
+                  summary: 密碼長度不足
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: 密碼必須至少 8 字元，並包含大寫字母、小寫字母、數字與特殊符號
+                weakPassword:
+                  summary: 密碼強度不足
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: 密碼必須至少 8 字元，並包含大寫字母、小寫字母、數字與特殊符號
+        '409':
+          description: 電子郵件已被註冊
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: EMAIL_ALREADY_EXISTS
+                  message: 此電子郵件已被註冊，請使用其他電子郵件或直接登入
+        '500':
+          description: 伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: INTERNAL_ERROR
+                  message: 伺服器錯誤，請稍後再試
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: 使用者登入
+      description: |
+        驗證使用者憑證並產生會話 Token。
+        
+        **功能需求對應**：FR-012 ~ FR-016
+        
+        **登入流程**：
+        1. 檢查帳號是否被鎖定（FR-022 ~ FR-025）
+        2. 驗證電子郵件與密碼
+        3. 若成功，建立會話並回傳 Token（FR-013）
+        4. 若失敗，記錄失敗次數（FR-016）
+        5. 連續失敗 3 次鎖定帳號 30 分鐘（FR-022 ~ FR-024）
+        
+        **安全性**：
+        - 錯誤訊息統一為「帳號或密碼錯誤」，不區分帳號不存在或密碼錯誤（FR-015，防止帳號枚舉）
+        - Token 儲存於 HTTP-Only Cookie（防止 XSS 攻擊）
+        - 會話有效期限 7 天（FR-018）
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: user@example.com
+              password: SecurePass123!
+      responses:
+        '200':
+          description: 登入成功
+          headers:
+            Set-Cookie:
+              description: JWT Token（HTTP-Only, Secure, SameSite=Strict）
+              schema:
+                type: string
+                example: jwt_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=604800
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                message: 登入成功
+                expiresAt: "2025-11-10T10:30:00Z"
+        '401':
+          description: 帳號或密碼錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: INVALID_CREDENTIALS
+                  message: 帳號或密碼錯誤
+        '403':
+          description: 帳號已被鎖定
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: ACCOUNT_LOCKED
+                  message: 帳號已被鎖定，請於 30 分鐘後再試
+        '500':
+          description: 伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: INTERNAL_ERROR
+                  message: 伺服器錯誤，請稍後再試
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: 使用者登出
+      description: |
+        登出當前使用者，銷毀會話。
+        
+        **功能需求對應**：FR-021
+        
+        **登出流程**：
+        1. 從 Cookie 中提取 JWT Token
+        2. 從 Token 中解析 Session ID
+        3. 刪除 Redis 中的會話記錄
+        4. 清除 Cookie
+        
+        **注意事項**：
+        - 此端點需要身分驗證（必須先登入）
+        - 登出後，原 Token 立即失效（即使 JWT 本身未過期）
+      operationId: logout
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: 登出成功
+          headers:
+            Set-Cookie:
+              description: 清除 JWT Token Cookie
+              schema:
+                type: string
+                example: jwt_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 登出成功
+        '401':
+          description: 未授權（未登入或 Token 無效）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: UNAUTHORIZED
+                  message: 未授權，請先登入
+        '500':
+          description: 伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: INTERNAL_ERROR
+                  message: 伺服器錯誤，請稍後再試
+
+  /auth/profile:
+    get:
+      tags:
+        - Authentication
+      summary: 查看個人資料
+      description: |
+        查詢當前登入使用者的個人資料。
+        
+        **功能需求對應**：FR-031 ~ FR-033
+        
+        **回應內容**：
+        - 電子郵件（FR-032）
+        - 註冊日期（FR-032）
+        - 不包含密碼資訊（FR-033）
+        
+        **注意事項**：
+        - 此端點需要身分驗證（必須先登入）
+        - 會話過期後將收到 401 錯誤（FR-020）
+      operationId: getProfile
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: 成功取得個人資料
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+              example:
+                userId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                email: user@example.com
+                createdAt: "2025-10-15T08:00:00Z"
+        '401':
+          description: 未授權或會話過期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  summary: 未登入
+                  value:
+                    error:
+                      code: UNAUTHORIZED
+                      message: 未授權，請先登入
+                sessionExpired:
+                  summary: 會話過期
+                  value:
+                    error:
+                      code: SESSION_EXPIRED
+                      message: 會話已過期，請重新登入
+        '500':
+          description: 伺服器錯誤
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: INTERNAL_ERROR
+                  message: 伺服器錯誤，請稍後再試
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: jwt_token
+      description: |
+        JWT Token 儲存於 HTTP-Only Cookie，自動附帶於請求。
+        
+        **Cookie 屬性**：
+        - `HttpOnly`：防止 JavaScript 存取（防 XSS）
+        - `Secure`：僅透過 HTTPS 傳輸
+        - `SameSite=Strict`：防止 CSRF 攻擊
+        - `Max-Age=604800`：有效期限 7 天
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: 電子郵件地址（必須唯一）
+          example: user@example.com
+          minLength: 1
+          maxLength: 255
+        password:
+          type: string
+          format: password
+          description: |
+            密碼（明文，傳輸後立即雜湊）
+            
+            **強度要求**：
+            - 至少 8 字元
+            - 至少一個大寫字母
+            - 至少一個小寫字母
+            - 至少一個數字
+            - 至少一個特殊符號
+          example: SecurePass123!
+          minLength: 8
+
+    RegisterResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: 新建立的使用者 ID（GUID）
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        email:
+          type: string
+          format: email
+          description: 使用者電子郵件
+          example: user@example.com
+        createdAt:
+          type: string
+          format: date-time
+          description: 註冊日期時間（ISO 8601 UTC）
+          example: "2025-11-03T10:30:00Z"
+        message:
+          type: string
+          description: 成功訊息
+          example: 註冊成功
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: 使用者電子郵件
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          description: 使用者密碼（明文）
+          example: SecurePass123!
+
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: 成功訊息
+          example: 登入成功
+        expiresAt:
+          type: string
+          format: date-time
+          description: 會話過期時間（ISO 8601 UTC）
+          example: "2025-11-10T10:30:00Z"
+      description: |
+        **注意**：JWT Token 不包含在回應 Body 中，而是透過 `Set-Cookie` Header 設定。
+
+    UserProfileResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: 使用者 ID（GUID）
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        email:
+          type: string
+          format: email
+          description: 使用者電子郵件
+          example: user@example.com
+        createdAt:
+          type: string
+          format: date-time
+          description: 註冊日期時間（ISO 8601 UTC）
+          example: "2025-10-15T08:00:00Z"
+      description: |
+        **安全性**：此端點不回傳密碼資訊（符合 FR-033）
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: |
+                錯誤碼（用於程式化處理）
+                
+                **錯誤碼清單**：
+                - `VALIDATION_ERROR`：輸入驗證失敗
+                - `EMAIL_ALREADY_EXISTS`：電子郵件已被註冊
+                - `INVALID_CREDENTIALS`：帳號或密碼錯誤
+                - `ACCOUNT_LOCKED`：帳號已被鎖定
+                - `SESSION_EXPIRED`：會話已過期
+                - `UNAUTHORIZED`：未授權存取
+                - `INTERNAL_ERROR`：伺服器內部錯誤
+              example: VALIDATION_ERROR
+              enum:
+                - VALIDATION_ERROR
+                - EMAIL_ALREADY_EXISTS
+                - INVALID_CREDENTIALS
+                - ACCOUNT_LOCKED
+                - SESSION_EXPIRED
+                - UNAUTHORIZED
+                - INTERNAL_ERROR
+            message:
+              type: string
+              description: 錯誤訊息（繁體中文，面向使用者）
+              example: 密碼必須至少 8 字元，並包含大寫字母、小寫字母、數字與特殊符號

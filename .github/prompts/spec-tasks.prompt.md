@@ -1,7 +1,7 @@
 ---
 mode: agent
 tools: ['edit/createFile', 'edit/createDirectory', 'edit/editFiles', 'search', 'runCommands', 'runTasks', 'usages', 'think', 'todos']
-description: '生成規格工作流程中的任務文件，確保專案任務明確且可執行'
+description: '從規格到實作的任務計畫文件生成器，確保專案任務明確且可執行'
 ---
 
 ## Usage
@@ -35,20 +35,22 @@ description: '生成規格工作流程中的任務文件，確保專案任務明
 
 若有問題，一次性列出所有錯誤。若 tasks.md 已存在，詢問「是否覆寫？」並等待確認後繼續。
 
-### 2. 生成設計文件
+### 2. 生成任務計畫文件
 
-- 依據 `tasks-template.md` 定義的「## Guidelines」與「## Process Flow」，生成 SPEC 文件
+- 依據 `tasks-template.md` 定義的「## Guidelines」與「## Process Flow」，生成任務計畫
 - 完成後，一次性寫入 `doc/changes/{feature-name}/tasks.md`
-   
+
 **呈現內容**
 ```
-✨ TASK 文件生成完成！
+✨ 任務計畫文件生成完成！
 
 📋 摘要：
 - **總任務數**：[總任務數]
 - **階段數量**：[Phase 數量]（Setup + Foundational + [N] User Stories + Polish）
 - **User Stories**：[User Story 數量]（MVP: US-001）
-- **測試任務**：[有/無]
+- **測試任務**：[有/無]（[數量] 項測試任務）
+
+📁 檔案位置：doc/changes/{feature-name}/tasks.md
 
 請確認內容是否符合專案規範。確認後將進入實作階段。
 ```
