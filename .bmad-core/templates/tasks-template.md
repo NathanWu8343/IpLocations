@@ -6,13 +6,8 @@
 
 **核心要求**：
 - 規劃**任務的拆解與執行順序**，而非**程式碼層級的技術實作**
-- 基於 `spec.md` 的**功能需求**與 `design.md` 的**設計決策**進行任務拆解
-
-**關鍵原則**：
-- 任務**必須**依 User Story 組織，以實現獨立的實作和測試
-- 每個 User Story 完成後可獨立驗證和部署
-- **測試為可選**：僅在 `spec.md` 中明確要求測試，或使用者明確要求 TDD 方法時，才產生測試任務。若需要測試，測試任務必須在對應的實作任務之前撰寫，遵循「測試先行」原則
-
+- 任務依 **User Story** 組織，每個 Story 完成後可獨立驗證與部署
+- 測試為**可選**：僅在 `spec.md` 明確要求或使用者要求 TDD 時產生，且必須測試先行
 
 ### Phase Structure（階段結構）
 
@@ -40,6 +35,35 @@
 - 特性：相依所有 User Story 完成
 - 內容：文件更新、程式碼清理、效能最佳化、安全性強化
 
+### Task Scope（任務範圍）
+
+**單一任務原則**：
+- 一個任務對應一個明確的交付物（單一檔案、單一功能、單一整合點）
+- 任務完成後可獨立驗證結果
+
+**顆粒度判斷**：
+- ✅ 適當：`在 src/services/auth.py 中實作 authenticate() 方法`
+- ❌ 過大：`實作使用者認證功能`（涵蓋多個檔案與職責）
+- ❌ 過小：`在檔案開頭新增 import 語句`（無獨立價值）
+
+**必要條件**：
+- 任務描述包含具體檔案路徑
+- 任務動作明確（建立/實作/整合/設定）
+- 有可驗證的完成標準
+
+**測試任務合併規則**：
+
+同一測試檔案的多個場景合併為單一任務，使用項目列表。
+
+格式：
+```markdown
+- [ ] T031 [US-001] 在 `tests/integration/RegisterTests.cs` 中撰寫完整的註冊測試套件
+  - 成功註冊：有效輸入應回傳 201
+  - 欄位驗證：空白欄位應回傳 400
+  - 格式驗證：無效格式應回傳 400
+```
+
+
 ### Task Format（任務格式）
 
 任務採用以下格式：
@@ -57,7 +81,6 @@
   - Setup、Foundational、Polish Phase 不使用 Story 標籤
 
 - **[描述]**：必須包含清晰的動作 + 確切的檔案路徑
-  - 範例：`在 src/models/user.py 中建立 User 模型`
 
 ### Task Organization（任務組織邏輯）
 
@@ -86,13 +109,6 @@
    - 阻擋性基礎任務 → Foundational Phase（Phase 2）
    - User Story 特定的設定 → 在該 User Story 的 Phase 內
 
-6. **處理測試任務（若需要）**
-   - 檢查 `spec.md` 是否明確要求測試
-   - 若需要，在每個 User Story 的實作任務前加入：
-     - 合約測試（Contract Tests）
-     - 整合測試（Integration Tests）
-   - 測試任務必須在對應的實作任務之前
-
 ## Process Flow
 
 ### 1. 載入指導文件與需求來源
@@ -109,19 +125,34 @@
 
 ### 2. 生成文件草稿
 
-**規劃填寫策略**：
-- 依照下方 Template 結構逐步完整填寫每個章節
-- 根據實際的 spec.md 和 design.md 內容調整階段數量
-- 確保每個 User Story 都有對應的階段
+**執行順序**：
+a. 為每個 User Story 建立獨立的 Phase（依 Task Organization 規則分配元件）
+b. 填寫 Setup 與 Foundational Phase（識別共享與阻塞性基礎）
+c. 填寫 Polish Phase（橫切面關注點）
+d. 補充 Dependencies 說明
 
 ### 3. 草稿反思與精煉
 
 **審視任務計畫品質：**
 從執行者視角重新審視整份內容，檢查並修正：
-a. 任務拆解品質 - 任務顆粒度適中（1-4小時可完成單個任務），無過度細分或過於籠統的描述
-b. 執行順序合理性 - Phase 間依賴清晰（Setup→Foundational→Stories→Polish），Phase 內任務順序符合技術邏輯（測試 → 模型 → 服務 → 端點 → 整合）
-c. 階段完整性- Foundational 包含所有關鍵基礎任務（共享設施），所有 User Story 有對應階段，無遺漏
-d. 可執行性 - 任務描述包含具體檔案路徑與明確動作，[Story] 標籤正確標註，每個 Story 檢查點可獨立驗證
+
+a. **任務拆解品質**
+   - 任務顆粒度符合單一職責原則
+   - 無過度細分或過於籠統的描述
+   - 每個任務有明確的交付物
+
+b. **執行順序合理性**
+   - Phase 間依賴清晰（Setup → Foundational → Stories → Polish）
+   - Phase 內任務順序遵循 Phase Structure 定義
+
+c. **階段完整性**
+   - Foundational 包含所有關鍵基礎任務
+   - 所有 User Story 有對應階段，無遺漏
+
+d. **可執行性**
+   - 任務描述包含具體檔案路徑與明確動作
+   - [Story] 標籤正確標註
+   - 每個 Story 檢查點可獨立驗證
 
 若發現問題 → 直接修正 → 繼續後續步驟
 
@@ -178,7 +209,12 @@ d. 可執行性 - 任務描述包含具體檔案路徑與明確動作，[Story] 
 **注意：請先撰寫這些測試，確保它們在實作前會失敗**
 
 - [ ] T010 [US-001] 在 tests/contract/test_[name].py 中為 [endpoint] 進行合約測試
+  - 成功註冊：有效輸入應回傳 201
+  - 欄位驗證：空白欄位應回傳 400
+  - 格式驗證：無效格式應回傳 400
 - [ ] T011 [US-001] 在 tests/integration/test_[name].py 中為 [user journey] 進行整合測試
+  - 有效格式：標準格式應通過驗證
+  - 無效格式：缺少 @ 或域名應驗證失敗
 
 ### User Story 1 的實作
 
@@ -202,7 +238,9 @@ d. 可執行性 - 任務描述包含具體檔案路徑與明確動作，[Story] 
 ### US-002 的測試 (可選 - 僅當要求測試時) ⚠️
 
 - [ ] T018 [US-002] 在 tests/contract/test_[name].py 中為 [endpoint] 進行合約測試
+  - [列出所有測試場景與預期行為]
 - [ ] T019 [US-002] 在 tests/integration/test_[name].py 中為 [user journey] 進行整合測試
+  - [列出所有測試場景與預期行為]
 
 ### US-002 的實作
 
@@ -223,14 +261,16 @@ d. 可執行性 - 任務描述包含具體檔案路徑與明確動作，[Story] 
 
 ### US-003  的測試 (可選 - 僅當要求測試時) ⚠️
 
-- [ ] T024 [US-003 ] 在 tests/contract/test_[name].py 中為 [endpoint] 進行合約測試
-- [ ] T025 [US-003 ] 在 tests/integration/test_[name].py 中為 [user journey] 進行整合測試
+- [ ] T024 [US-003] 在 tests/contract/test_[name].py 中為 [endpoint] 進行合約測試
+  - [列出所有測試場景與預期行為]
+- [ ] T025 [US-003] 在 tests/integration/test_[name].py 中為 [user journey] 進行整合測試
+  - [列出所有測試場景與預期行為]
 
 ### US-003 的實作
 
-- [ ] T026 [US-003 ] 在 src/models/[entity].py 中建立 [Entity] 模型
-- [ ] T027 [US-003 ] 在 src/services/[service].py 中實作 [Service]
-- [ ] T028 [US-003 ] 在 src/[location]/[file].py 中實作 [endpoint/feature]
+- [ ] T026 [US-003] 在 src/models/[entity].py 中建立 [Entity] 模型
+- [ ] T027 [US-003] 在 src/services/[service].py 中實作 [Service]
+- [ ] T028 [US-003] 在 src/[location]/[file].py 中實作 [endpoint/feature]
 
 **✅ 檢查點**: 所有 User Story 現在都應能獨立運作
 
@@ -276,6 +316,7 @@ d. 可執行性 - 任務描述包含具體檔案路徑與明確動作，[Story] 
 - 服務先於端點
 - 核心實作先於整合
 - User Story 完成後再移至下一個優先順序
+
 ## Implementation Strategy
 
 ### MVP First (僅限 User Story 1)
