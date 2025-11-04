@@ -33,20 +33,20 @@ description: "根據 tasks.md 自動執行功能實作任務，嚴格遵循 TDD 
 ### 1. 載入並分析實作內容
 
 **指導文件（專案標準）**：
-a. `doc/steering/architecture.md` → 整體架構模式、設計原則
-b. `doc/steering/tech.md` → 技術模式、標準與最佳實踐
-c. `doc/steering/structure.md` → 檔案組織慣例、命名規範
+- `doc/steering/architecture.md` → 整體架構模式、設計原則
+- `doc/steering/tech.md` → 技術模式、標準與最佳實踐
+- `doc/steering/structure.md` → 檔案組織慣例、命名規範
 
 **功能實作文件（必讀）**：
-d. `doc/changes/{feature-name}/tasks.md` → 任務清單與執行計畫
-e. `doc/changes/{feature-name}/design.md` → 元件設計與檔案結構
+- `doc/changes/{feature-name}/tasks.md` → 任務清單與執行計畫
+- `doc/changes/{feature-name}/design.md` → 元件設計與檔案結構
 
 **補充文件（按需參考）**：
-f. `doc/changes/{feature-name}/contracts/` → API 規格（若存在）
+- `doc/changes/{feature-name}/contracts/` → API 規格（若存在）
 
 ### 2. 解析 tasks.md 結構並擷取
 
-閱讀並理解 `tasks.md` 的內容：
+**閱讀並理解 `tasks.md` 的內容**：
 - **任務階段**：識別所有階段及其目的、識別阻塞性階段
 - **任務清單**：提取每個任務的 ID、描述、檔案路徑
 - **任務狀態**：`- [ ]` = 待執行，`- [X]` = 已完成
@@ -71,11 +71,11 @@ f. `doc/changes/{feature-name}/contracts/` → API 規格（若存在）
 對於每個任務：
   1. 檢查是否已完成（tasks.md 中是否標記為 [X]）
   2. 若未完成：
-     a. 理解任務描述
-     b. 執行實作（參考 design.md 與指導文件）
-     c. 驗證結果
-     d. 若失敗則重試（最多 3 次）
-     e. 成功後更新 tasks.md 標記為 [X]
+     1. 理解任務描述
+     2. 執行實作（參考 design.md 與指導文件）
+     3. 驗證結果
+     4. 若失敗則重試（最多 3 次）
+     5. 成功後更新 tasks.md 標記為 [X]
   3. 輸出進度
 ```
 
@@ -100,9 +100,9 @@ f. `doc/changes/{feature-name}/contracts/` → API 規格（若存在）
 **錯誤處理**：
 - 任務執行失敗時自動重試最多 3 次
 - 3 次重試後仍失敗：
-  - 記錄詳細錯誤訊息（任務 ID、錯誤類型、可能原因、建議解決方案）
-  - 終止整個執行流程
-  - 提示使用者修復問題後重新執行
+  1. 記錄詳細錯誤訊息（任務 ID、錯誤類型、可能原因、建議解決方案）
+  2. 終止整個執行流程
+  3. 提示使用者修復問題後重新執行
 
 **階段完成報告**：
 
@@ -116,11 +116,11 @@ f. `doc/changes/{feature-name}/contracts/` → API 規格（若存在）
 ### 6. 完成驗證
 
 **最終驗證**：
-- 驗證所有必要的任務都已完成
-- 檢查實作的功能是否符合原始規格
-- 驗證測試是否通過且涵蓋範圍符合需求
-- 確認實作遵循技術計畫
-- 報告最終狀態以及已完成工作的摘要
+a. 驗證所有必要的任務都已完成
+b. 檢查實作的功能是否符合原始規格
+c. 驗證測試是否通過且涵蓋範圍符合需求
+d. 確認實作遵循技術計畫
+e. 報告最終狀態以及已完成工作的摘要
 
 ## 輸出格式範例
 
