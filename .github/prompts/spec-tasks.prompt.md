@@ -30,6 +30,9 @@ description: '從規格到實作的任務計畫文件生成器，確保專案任
 - `doc/changes/{feature-name}/spec.md`
 - `doc/changes/{feature-name}/design.md`
 
+**(可選) 檢查合約規範**
+- `doc/changes/{feature-name}/contracts/`
+
 **檢查檔案**
 - 檢查 `doc/changes/{feature-name}/tasks.md` 是否已存在
 

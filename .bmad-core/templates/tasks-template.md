@@ -7,7 +7,7 @@
 **核心要求**：
 - 規劃**任務的拆解與執行順序**，而非**程式碼層級的技術實作**
 - 任務依 **User Story** 組織，每個 Story 完成後可獨立驗證與部署
-- 測試為**可選**：僅在 `spec.md` 明確要求或使用者要求 TDD 時產生，且必須測試先行
+
 
 ### Phase Structure（階段結構）
 
@@ -34,35 +34,6 @@
 - 目的：橫切面關注點
 - 特性：相依所有 User Story 完成
 - 內容：文件更新、程式碼清理、效能最佳化、安全性強化
-
-### Task Scope（任務範圍）
-
-**單一任務原則**：
-- 一個任務對應一個明確的交付物（單一檔案、單一功能、單一整合點）
-- 任務完成後可獨立驗證結果
-
-**顆粒度判斷**：
-- ✅ 適當：`在 src/services/auth.py 中實作 authenticate() 方法`
-- ❌ 過大：`實作使用者認證功能`（涵蓋多個檔案與職責）
-- ❌ 過小：`在檔案開頭新增 import 語句`（無獨立價值）
-
-**必要條件**：
-- 任務描述包含具體檔案路徑
-- 任務動作明確（建立/實作/整合/設定）
-- 有可驗證的完成標準
-
-**測試任務合併規則**：
-
-同一測試檔案的多個場景合併為單一任務，使用項目列表。
-
-格式：
-```markdown
-- [ ] T031 [US-001] 在 `tests/integration/RegisterTests.cs` 中撰寫完整的註冊測試套件
-  - 成功註冊：有效輸入應回傳 201
-  - 欄位驗證：空白欄位應回傳 400
-  - 格式驗證：無效格式應回傳 400
-```
-
 
 ### Task Format（任務格式）
 
@@ -102,12 +73,25 @@
 
 4. **分配 API 端點（從 design.md 或 contracts/）**
    - 每個 endpoint/contract → 對應至其服務的 User Story Phase
-   - 若有要求測試：Contract 測試任務 → 在實作任務之前
 
 5. **分配基礎設施（從 design.md）**
    - 共享基礎設施 → Setup Phase（Phase 1）
    - 阻擋性基礎任務 → Foundational Phase（Phase 2）
    - User Story 特定的設定 → 在該 User Story 的 Phase 內
+
+6. **處理測試任務**
+   
+   **合約測試（Contract Tests）** - 來自合約規範
+   - 檢查 `design.md` 或 `contracts/` 是否定義 API 合約規範
+   - 若有，為每個 User Story 產生合約測試任務，驗證 API 介面結構
+   
+   **整合測試（Integration Tests）** - 來自 Feature Scenarios
+   - 檢查 `spec.md` 是否包含 Feature Scenarios 章節
+   - 若有，為每個 User Story 產生 Scenario 測試任務：
+     - 一個 US 的所有 SCN-XXX 歸為一個任務
+     - 使用巢狀結構，子項目標註 `(SCN-XXX)`
+     - 完整性檢查：確認每個 SCN-XXX 都出現在任務中
+   - 測試任務與實作任務位於同一 User Story Phase
 
 ## Process Flow
 
@@ -115,21 +99,25 @@
 
 **依序讀取以下文件**：
 
-**(1-2) 功能層級來源**
 - `doc/changes/{feature-name}/spec.md` → User Story、成功指標、功能需求
 - `doc/changes/{feature-name}/design.md` → 設計決策、元件結構、技術選型
   - ⚠️ 必須載入完整內容，不可遺漏任何設計細節
-
-**(可選) 合約規範**
 - `doc/changes/{feature-name}/contracts/` → OpenAPI/GraphQL 結構描述（若存在）
+  - ⚠️ 必須載入所有合約文件，以便生成合約測試任務
 
 ### 2. 生成文件草稿
 
-**執行順序**：
-a. 為每個 User Story 建立獨立的 Phase（依 Task Organization 規則分配元件）
-b. 填寫 Setup 與 Foundational Phase（識別共享與阻塞性基礎）
-c. 填寫 Polish Phase（橫切面關注點）
-d. 補充 Dependencies 說明
+**執行前準備**：
+根據載入的文件內容，先完成以下分析：
+- 提取所有 User Stories 及優先順序（從 spec.md）
+- 識別所有需實作的元件：模型、服務、端點（從 design.md）
+- 判斷元件歸屬：單一 Story / 多 Story 共享 / 基礎設施
+
+**規劃填寫策略**：
+依照 Guidelines 中的各項規範，逐章節填寫 template：
+a. 根據「Phase Structure」確定階段數量與順序
+b. 根據「Task Organization」分配元件到各階段
+c. 根據「Task Format」撰寫任務描述（動作 + 檔案路徑）
 
 ### 3. 草稿反思與精煉
 
@@ -148,11 +136,17 @@ b. **執行順序合理性**
 c. **階段完整性**
    - Foundational 包含所有關鍵基礎任務
    - 所有 User Story 有對應階段，無遺漏
+   - design.md 所有元件（模型/服務/端點）已分配到任務
+   - Feature Scenarios 的所有 SCN-XXX 都已分配（若有）
+   - API 合約測試任務已產生（若有規範）
+
 
 d. **可執行性**
-   - 任務描述包含具體檔案路徑與明確動作
+   - 任務描述包含檔案路徑與明確動作
    - [Story] 標籤正確標註
-   - 每個 Story 檢查點可獨立驗證
+   - Scenario 測試：巢狀結構 + `(SCN-XXX)` 標註
+   - 合約測試：標註「（合約測試）」
+   - Story 檢查點可獨立驗證
 
 若發現問題 → 直接修正 → 繼續後續步驟
 
@@ -209,12 +203,10 @@ d. **可執行性**
 **注意：請先撰寫這些測試，確保它們在實作前會失敗**
 
 - [ ] T010 [US-001] 在 tests/contract/test_[name].py 中為 [endpoint] 進行合約測試
-  - 成功註冊：有效輸入應回傳 201
-  - 欄位驗證：空白欄位應回傳 400
-  - 格式驗證：無效格式應回傳 400
-- [ ] T011 [US-001] 在 tests/integration/test_[name].py 中為 [user journey] 進行整合測試
-  - 有效格式：標準格式應通過驗證
-  - 無效格式：缺少 @ 或域名應驗證失敗
+- [ ] T011 [US-001] 在 tests/features/test_[feature].py 中實作 [US-001的簡要標題] 的測試
+  - [場景描述] (SCN-001)
+  - [場景描述] (SCN-002)
+  - [場景描述] (SCN-003)
 
 ### User Story 1 的實作
 
@@ -238,9 +230,9 @@ d. **可執行性**
 ### US-002 的測試 (可選 - 僅當要求測試時) ⚠️
 
 - [ ] T018 [US-002] 在 tests/contract/test_[name].py 中為 [endpoint] 進行合約測試
-  - [列出所有測試場景與預期行為]
-- [ ] T019 [US-002] 在 tests/integration/test_[name].py 中為 [user journey] 進行整合測試
-  - [列出所有測試場景與預期行為]
+- [ ] T019 [US-002] 在 tests/integration/test_[name].py  中實作 [US-002的簡要標題] 的測試
+  - [場景描述] (SCN-XXX)
+  - [場景描述] (SCN-XXX)
 
 ### US-002 的實作
 
@@ -262,10 +254,10 @@ d. **可執行性**
 ### US-003  的測試 (可選 - 僅當要求測試時) ⚠️
 
 - [ ] T024 [US-003] 在 tests/contract/test_[name].py 中為 [endpoint] 進行合約測試
-  - [列出所有測試場景與預期行為]
-- [ ] T025 [US-003] 在 tests/integration/test_[name].py 中為 [user journey] 進行整合測試
-  - [列出所有測試場景與預期行為]
-
+- [ ] T025 [US-003] 在 tests/integration/test_[name].py 中實作 [US-003的簡要標題] 的測試
+  - [場景描述] (SCN-XXX)
+  - [場景描述] (SCN-XXX)
+  
 ### US-003 的實作
 
 - [ ] T026 [US-003] 在 src/models/[entity].py 中建立 [Entity] 模型
